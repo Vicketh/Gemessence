@@ -5,7 +5,7 @@ import { useProducts } from "@/hooks/use-products";
 import { useState } from "react";
 import { type Product } from "@shared/schema";
 import { motion } from "framer-motion";
-import { ChevronRight, Diamond, Sparkles, ShieldCheck } from "lucide-react";
+import { ChevronRight, Diamond, Sparkles, ShieldCheck, Gem } from "lucide-react";
 import { Link } from "wouter";
 import heroImg from "@assets/Hero_1772877259305.png";
 import footerImg from "@assets/Footer_1772877259305.png";
