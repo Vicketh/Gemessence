@@ -1,16 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Upload, 
-  Save,
-  X,
-  Image as ImageIcon,
-  Tag,
-  DollarSign
-} from "lucide-react";
+import { Plus, Edit, Trash2, Save, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,8 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CloudinaryUploader } from "@/components/ui/cloudinary-uploader";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getProducts, createProduct, updateProduct, deleteProduct } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import type { CloudinaryResult } from "@/lib/cloudinary";
 
 interface Product {
   id: number;
@@ -55,10 +51,32 @@ const metalColors = ["Yellow", "White", "Rose"];
 const gemstoneTypes = ["Diamond", "Ruby", "Sapphire", "Emerald", "Pearl", "Amethyst"];
 
 export function AdminProductManager() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [imageUploadMethod, setImageUploadMethod] = useState<"upload" | "url">("upload");
+
+  const { data: products = [], isLoading } = useQuery<Product[]>({
+    queryKey: ["products"],
+    queryFn: () => getProducts(),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (p: Partial<Product>) => createProduct(p),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["products"] }); toast({ title: "Product created" }); setIsAddingProduct(false); resetForm(); },
+    onError: () => toast({ title: "Error", description: "Failed to create product.", variant: "destructive" }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Product> }) => updateProduct(id, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["products"] }); toast({ title: "Product updated" }); setEditingProduct(null); resetForm(); },
+    onError: () => toast({ title: "Error", description: "Failed to update product.", variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteProduct(id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["products"] }); toast({ title: "Product deleted" }); },
+  });
 
   const [formData, setFormData] = useState<Partial<Product>>({
     name: "",
@@ -85,37 +103,15 @@ export function AdminProductManager() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      // In a real app, you'd upload to a cloud service
-      const imageUrls = Array.from(files).map(file => URL.createObjectURL(file));
-      setFormData(prev => ({
-        ...prev,
-        images: [...(prev.images || []), ...imageUrls],
-        imageUrl: prev.imageUrl || imageUrls[0]
-      }));
-    }
-  };
-
   const handleSaveProduct = () => {
     if (editingProduct) {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...formData, id: editingProduct.id } as Product : p));
-      setEditingProduct(null);
+      updateMutation.mutate({ id: editingProduct.id, data: formData });
     } else {
-      const newProduct: Product = {
-        ...formData,
-        id: Date.now(),
-      } as Product;
-      setProducts(prev => [...prev, newProduct]);
-      setIsAddingProduct(false);
+      createMutation.mutate(formData);
     }
-    resetForm();
   };
 
-  const handleDeleteProduct = (id: number) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
-  };
+  const handleDeleteProduct = (id: number) => deleteMutation.mutate(id);
 
   const handleEditProduct = (product: Product) => {
     setFormData(product);
@@ -255,49 +251,18 @@ export function AdminProductManager() {
           {/* Image Upload */}
           <div>
             <Label>Product Images</Label>
-            <Tabs value={imageUploadMethod} onValueChange={(value) => setImageUploadMethod(value as "upload" | "url")}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upload">Upload Files</TabsTrigger>
-                <TabsTrigger value="url">Image URL</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="upload">
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Click to upload images</p>
-                  </label>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="url">
-                <Input
-                  placeholder="Enter image URL"
-                  value={formData.imageUrl}
-                  onChange={(e) => handleInputChange("imageUrl", e.target.value)}
-                />
-              </TabsContent>
-            </Tabs>
-
-            {/* Image Preview */}
-            {(formData.images?.length || formData.imageUrl) && (
-              <div className="grid grid-cols-4 gap-2 mt-4">
-                {formData.images?.map((img, index) => (
-                  <img key={index} src={img} alt={`Product ${index + 1}`} className="w-full h-20 object-cover rounded" />
-                ))}
-                {formData.imageUrl && !formData.images?.includes(formData.imageUrl) && (
-                  <img src={formData.imageUrl} alt="Product" className="w-full h-20 object-cover rounded" />
-                )}
-              </div>
-            )}
+            <CloudinaryUploader
+              folder="gemessence/products"
+              accept="image/*"
+              multiple
+              label="Upload Product Images"
+              preview={formData.imageUrl}
+              onUpload={(r: CloudinaryResult) => handleInputChange("imageUrl", r.secure_url)}
+              onMultiUpload={(results: CloudinaryResult[]) => {
+                handleInputChange("images", results.map(r => r.secure_url));
+                if (results[0]) handleInputChange("imageUrl", results[0].secure_url);
+              }}
+            />
           </div>
         </TabsContent>
 
@@ -420,9 +385,9 @@ export function AdminProductManager() {
         }}>
           Cancel
         </Button>
-        <Button onClick={handleSaveProduct} className="bg-primary hover:bg-primary/90">
+        <Button onClick={handleSaveProduct} disabled={createMutation.isPending || updateMutation.isPending} className="bg-primary hover:bg-primary/90">
           <Save className="h-4 w-4 mr-2" />
-          Save Product
+          {createMutation.isPending || updateMutation.isPending ? "Saving..." : "Save Product"}
         </Button>
       </div>
     </div>
@@ -457,6 +422,11 @@ export function AdminProductManager() {
       </Dialog>
 
       {/* Products Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1,2,3].map(i => <div key={i} className="animate-pulse bg-muted aspect-square rounded-2xl" />)}
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <motion.div
@@ -481,20 +451,24 @@ export function AdminProductManager() {
                   )}
                 </div>
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    onClick={() => handleEditProduct(product)}
-                  >
+                  <Button size="icon" variant="secondary" onClick={() => handleEditProduct(product)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={() => handleDeleteProduct(product.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="icon" variant="destructive"><Trash2 className="h-4 w-4" /></Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                        <AlertDialogDescription>Permanently delete "{product.name}"?</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteProduct(product.id)}>Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
               <CardContent className="p-4">
@@ -528,7 +502,9 @@ export function AdminProductManager() {
         ))}
       </div>
 
-      {products.length === 0 && (
+      )}
+
+      {!isLoading && products.length === 0 && (
         <div className="text-center py-12">
           <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">No products yet</h3>

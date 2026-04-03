@@ -2,6 +2,7 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 import { AdminProductManager } from "@/components/admin/product-manager";
 import { AdminUserManager } from "@/components/admin/user-manager";
 import { AdminReviewManager } from "@/components/admin/review-manager";
+import { AdminMediaManager } from "@/components/admin/media-manager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -24,9 +25,7 @@ import {
   DollarSign,
   TrendingUp,
   Package,
-  Star,
-  MessageSquare,
-  Eye,
+  Images,
 } from "lucide-react";
 
 // Mock data
@@ -84,9 +83,10 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="media">Media</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -215,6 +215,10 @@ export default function AdminDashboard() {
 
           <TabsContent value="products">
             <AdminProductManager />
+          </TabsContent>
+
+          <TabsContent value="media">
+            <AdminMediaManager />
           </TabsContent>
 
           <TabsContent value="users">
