@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -29,8 +30,9 @@ export function log(message: string, source = "express") {
     second: "2-digit",
     hour12: true,
   });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
+  // Sanitize to prevent log injection
+  const sanitized = message.replace(/[\r\n]/g, " ");
+  console.log(`${formattedTime} [${source}] ${sanitized}`);
 }
 
 app.use((req, res, next) => {
@@ -47,7 +49,9 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      // Sanitize path to prevent log injection
+      const safePath = path.replace(/[\r\n]/g, " ");
+      let logLine = `${req.method} ${safePath} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }

@@ -1,128 +1,225 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Gold Texture */
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 10%;
-    
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 10%;
-    
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    
-    --primary: 43 65% 52%; /* Gold #D4AF37 */
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
-    
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    
-    --accent: 43 65% 52%;
-    --accent-foreground: 0 0% 100%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 0 0% 10%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 43 65% 52%;
+        --card: 0 0% 98%;
+        --card-foreground: 0 0% 10%;
 
-    --radius: 0.75rem;
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 10%;
 
-    --font-sans: 'Plus Jakarta Sans', sans-serif;
-    --font-display: 'Playfair Display', serif;
-  }
+        --primary: 43 72% 47%; /* Gold #C9A227 */
+        --primary-foreground: 0 0% 100%;
 
-  .dark {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
-    
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 98%;
-    
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 98%;
-    
-    --primary: 43 65% 52%; /* Gold #D4AF37 */
-    --primary-foreground: 0 0% 10%;
-    
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 65%;
-    
-    --accent: 43 65% 52%;
-    --accent-foreground: 0 0% 10%;
-    
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 43 65% 52%;
-  }
+        --secondary: 0 72% 25%; /* Dark Red */
+        --secondary-foreground: 0 0% 100%;
 
-  * {
-    @apply border-border;
-  }
+        --muted: 0 0% 96%;
+        --muted-foreground: 0 0% 45%;
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: var(--font-sans);
-  }
+        --accent: 43 72% 47%;
+        --accent-foreground: 0 0% 100%;
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
-    @apply tracking-tight;
-  }
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 98%;
+
+        --border: 0 0% 90%;
+        --input: 0 0% 90%;
+        --ring: 43 72% 47%;
+
+        --radius: 0.75rem;
+
+        --font-sans: "Plus Jakarta Sans", sans-serif;
+        --font-display: "Playfair Display", serif;
+    }
+
+    .dark {
+        --background: 0 0% 4%; /* Matte Black */
+        --foreground: 0 0% 95%;
+
+        --card: 0 0% 6%; /* Dark Matte */
+        --card-foreground: 0 0% 95%;
+
+        --popover: 0 0% 4%;
+        --popover-foreground: 0 0% 95%;
+
+        --primary: 43 72% 55%; /* Brighter Royal Gold for dark */
+        --primary-foreground: 0 0% 8%;
+
+        --secondary: 0 72% 35%; /* Dark Red */
+        --secondary-foreground: 0 0% 100%;
+
+        --muted: 0 0% 8%;
+        --muted-foreground: 0 0% 65%;
+
+        --accent: 43 72% 55%;
+        --accent-foreground: 0 0% 8%;
+
+        --border: 0 0% 12%;
+        --input: 0 0% 12%;
+        --ring: 43 72% 55%;
+    }
+
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground antialiased;
+        font-family: var(--font-sans);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-display);
+        @apply tracking-tight;
+    }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: var(--font-display);
-  }
-  
-  .text-gold {
-    color: hsl(var(--primary));
-  }
-  
-  .bg-gold {
-    background-color: hsl(var(--primary));
-  }
+    .font-display {
+        font-family: var(--font-display);
+    }
 
-  .gold-glow {
-    box-shadow: 0 0 15px 2px rgba(212, 175, 55, 0.2);
-  }
-  
-  .dark .gold-glow {
-    box-shadow: 0 0 20px 2px rgba(212, 175, 55, 0.15);
-  }
+    .text-gold {
+        color: hsl(var(--primary));
+    }
 
-  .gold-glow-hover {
-    transition: all 0.3s ease-out;
-  }
+    .bg-gold {
+        background-color: hsl(var(--primary));
+    }
 
-  .gold-glow-hover:hover {
-    box-shadow: 0 0 25px 4px rgba(212, 175, 55, 0.4);
-    border-color: rgba(212, 175, 55, 0.8);
-    transform: translateY(-2px);
-  }
-  
-  .dark .gold-glow-hover:hover {
-    box-shadow: 0 0 30px 5px rgba(212, 175, 55, 0.3);
-    border-color: rgba(212, 175, 55, 0.8);
-  }
+    /* Gold Texture Background */
+    .bg-gold-texture {
+        background-image: url("/assets/gold.webp");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
 
-  .glass-panel {
-    @apply bg-background/70 backdrop-blur-xl border border-border/50;
-  }
-  
-  .dark .glass-panel {
-    @apply bg-background/50 backdrop-blur-xl border border-white/10;
-  }
+    .bg-gold-texture-overlay {
+        background-image:
+            linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+            url("/assets/gold.webp");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* Gold Gradient Animation */
+    @keyframes gold-shimmer {
+        0% {
+            background-position: -200% center;
+        }
+        100% {
+            background-position: 200% center;
+        }
+    }
+
+    .gold-shimmer {
+        background: linear-gradient(
+            90deg,
+            #9a7209 0%,
+            #c9a227 25%,
+            #e8c84a 50%,
+            #c9a227 75%,
+            #9a7209 100%
+        );
+        background-size: 200% auto;
+        animation: gold-shimmer 3s linear infinite;
+    }
+
+    .gold-glow {
+        box-shadow: 0 0 15px 2px rgba(201, 162, 39, 0.25);
+    }
+
+    .dark .gold-glow {
+        box-shadow: 0 0 20px 2px rgba(201, 162, 39, 0.2);
+    }
+
+    .gold-glow-hover {
+        transition: all 0.3s ease-out;
+    }
+
+    .gold-glow-hover:hover {
+        box-shadow: 0 0 25px 4px rgba(201, 162, 39, 0.45);
+        border-color: rgba(201, 162, 39, 0.8);
+        transform: translateY(-2px);
+    }
+
+    .dark .gold-glow-hover:hover {
+        box-shadow: 0 0 30px 5px rgba(201, 162, 39, 0.35);
+        border-color: rgba(201, 162, 39, 0.8);
+    }
+
+    .glass-panel {
+        @apply bg-background/70 backdrop-blur-xl border border-border/50;
+    }
+
+    .dark .glass-panel {
+        @apply bg-background/50 backdrop-blur-xl border border-white/10;
+    }
+
+    /* Gold Border Gradient */
+    .gold-border {
+        position: relative;
+        background:
+            linear-gradient(var(--card), var(--card)) padding-box,
+            linear-gradient(135deg, #9a7209, #c9a227, #e8c84a, #c9a227, #9a7209)
+                border-box;
+        border: 2px solid transparent;
+    }
+
+    /* Gold Text Gradient */
+    .text-gold-gradient {
+        background: linear-gradient(135deg, #9a7209, #c9a227, #e8c84a, #c9a227);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Dark Red utilities */
+    .text-red-accent {
+        color: hsl(var(--secondary));
+    }
+
+    .bg-red-accent {
+        background-color: hsl(var(--secondary));
+    }
+
+    .border-red-accent {
+        border-color: hsl(var(--secondary));
+    }
+
+    /* Dark Red Gradient */
+    .text-red-gradient {
+        background: linear-gradient(135deg, #600000, #800000, #a00000, #800000);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Dual accent gradient (Gold + Dark Red) */
+    .bg-dual-accent {
+        background: linear-gradient(135deg, #9a7209, #c9a227, #600000, #800000);
+    }
+
+    .text-dual-accent {
+        background: linear-gradient(135deg, #c9a227, #e8c84a, #800000, #a00000);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
 }

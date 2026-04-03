@@ -14,6 +14,11 @@ export function serveStatic(app: Express) {
 
   // fall through to index.html if the file doesn't exist
   app.use("/{*path}", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    // Use path.resolve and verify it stays within distPath to prevent path traversal
+    const indexPath = path.resolve(distPath, "index.html");
+    if (!indexPath.startsWith(distPath)) {
+      return res.status(403).send("Forbidden");
+    }
+    res.sendFile(indexPath);
   });
 }

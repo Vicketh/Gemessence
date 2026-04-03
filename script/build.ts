@@ -62,6 +62,7 @@ async function buildAll() {
 }
 
 buildAll().catch((err) => {
-  console.error(err);
+  const safeErr = String(err).replace(/[\r\n]/g, " ");
+  console.error(safeErr);
   process.exit(1);
 });

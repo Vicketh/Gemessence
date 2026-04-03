@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { type Product } from "@shared/schema";
 import { ShoppingBag, Eye } from "lucide-react";
 import { Button } from "./ui/button";
+import { useCurrency } from "@/hooks/use-currency";
 
 interface ProductCardProps {
   product: Product;
@@ -9,11 +10,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onClick }: ProductCardProps) {
-  // Format price gracefully
-  const formattedPrice = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(Number(product.price));
+  const { formatPrice } = useCurrency();
 
   return (
     <motion.div
@@ -29,21 +26,32 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
         {/* Placeholder image from Unsplash to ensure visual quality if imageUrl fails */}
         <motion.img
           layoutId={`product-image-${product.id}`}
-          src={product.imageUrl || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
+          src={
+            product.imageUrl ||
+            "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"
+          }
           alt={product.name}
           className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
         />
-        
+
         {/* Hover overlay actions */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-          <Button size="icon" variant="secondary" className="rounded-full h-12 w-12 hover:bg-primary hover:text-primary-foreground gold-glow">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="rounded-full h-12 w-12 hover:bg-primary hover:text-primary-foreground gold-glow"
+          >
             <Eye className="w-5 h-5" />
           </Button>
-          <Button size="icon" variant="secondary" className="rounded-full h-12 w-12 hover:bg-primary hover:text-primary-foreground gold-glow">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="rounded-full h-12 w-12 hover:bg-primary hover:text-primary-foreground gold-glow"
+          >
             <ShoppingBag className="w-5 h-5" />
           </Button>
         </div>
-        
+
         {product.featured && (
           <div className="absolute top-4 left-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">
             Featured
@@ -63,7 +71,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
             {product.description}
           </p>
           <p className="font-display text-xl font-bold text-foreground">
-            {formattedPrice}
+            {formatPrice(product.price)}
           </p>
         </div>
       </div>

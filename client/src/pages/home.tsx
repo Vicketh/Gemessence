@@ -1,106 +1,222 @@
 import { Navbar } from "@/components/layout/navbar";
 import { ProductCard } from "@/components/product-card";
 import { ProductModal } from "@/components/product-modal";
+import { GemEssenceLogo } from "@/components/ui/gemessence-logo";
+import { HeroSlideshow } from "@/components/ui/hero-slideshow";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { WhatsAppFloatingButton } from "@/components/ui/whatsapp-floating-button";
+import { InteractiveProductCard } from "@/components/ui/interactive-product-card";
 import { useProducts } from "@/hooks/use-products";
 import { useState } from "react";
 import { type Product } from "@shared/schema";
 import { motion } from "framer-motion";
-import { ChevronRight, Diamond, Sparkles, ShieldCheck, Gem } from "lucide-react";
+import {
+  ChevronRight,
+  Diamond,
+  Sparkles,
+  ShieldCheck,
+  Star,
+  Quote,
+} from "lucide-react";
 import { Link } from "wouter";
-import heroImg from "@assets/Hero_1772877259305.png";
 import footerImg from "@assets/Footer_1772877259305.png";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Fallback realistic data if API is empty/loading
-  const displayProducts = products?.length ? products : Array(6).fill({
-    id: 0,
-    name: "Loading Masterpiece...",
-    description: "Please wait while we unearth our finest collection.",
-    price: "0.00",
-    imageUrl: "",
-    category: "Collection",
-    featured: false,
-  });
+  // Featured reviews data
+  const featuredReviews = [
+    {
+      id: 1,
+      name: "Sarah Johnson",
+      rating: 5,
+      comment: "Absolutely stunning! This necklace exceeded my expectations. The craftsmanship is incredible and it looks even better in person.",
+      product: "Royal Gold Chain Necklace",
+      avatar: ""
+    },
+    {
+      id: 2,
+      name: "Michael Chen",
+      rating: 5,
+      comment: "Beautiful bracelet with excellent build quality. The gold finish is perfect and it feels substantial. Worth every penny.",
+      product: "Luxury Chain Bracelet",
+      avatar: ""
+    },
+    {
+      id: 3,
+      name: "Emma Wilson",
+      rating: 5,
+      comment: "Perfect for special occasions. I bought this for my anniversary and it was exactly as described. Highly recommend!",
+      product: "Artisan Gold Chain Set",
+      avatar: ""
+    }
+  ];
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }).map((_, i) => (
+      <Star
+        key={i}
+        className={`h-4 w-4 ${
+          i < rating ? 'fill-primary text-primary' : 'text-muted-foreground'
+        }`}
+      />
+    ));
+  };
+
+  // Chain product images for new products
+  const chainImages = [
+    "/Chain Ch.00_03_24_22.Still032.jpg",
+    "/Chain Ch.00_03_26_01.Still031.jpg", 
+    "/Chain Ch.00_03_27_03.Still030.jpg",
+    "/Chain Ch.00_03_28_06.Still029.jpg",
+    "/Chain Ch.00_03_29_07.Still028.jpg",
+    "/Chain Ch.00_03_30_02.Still027.jpg"
+  ];
+
+  // Enhanced product data with chain images
+  const enhancedProducts = products?.length ? products : [
+    {
+      id: 1,
+      name: "Royal Gold Chain Necklace",
+      description: "Exquisite 18k gold chain with intricate link design",
+      price: "125000.00",
+      imageUrl: chainImages[0],
+      category: "Necklaces",
+      featured: true,
+      rating: 5,
+      reviews: 24
+    },
+    {
+      id: 2, 
+      name: "Luxury Chain Bracelet",
+      description: "Premium gold bracelet with sophisticated craftsmanship",
+      price: "85000.00",
+      imageUrl: chainImages[1],
+      category: "Bracelets",
+      featured: true,
+      rating: 4,
+      reviews: 18
+    },
+    {
+      id: 3,
+      name: "Artisan Gold Chain Set",
+      description: "Handcrafted chain jewelry with royal elegance",
+      price: "195000.00",
+      imageUrl: chainImages[2],
+      category: "Sets",
+      featured: true,
+      rating: 5,
+      reviews: 12
+    },
+    {
+      id: 4,
+      name: "Classic Chain Pendant",
+      description: "Timeless gold chain with elegant pendant design",
+      price: "75000.00",
+      imageUrl: chainImages[3],
+      category: "Necklaces",
+      featured: true,
+      rating: 4,
+      reviews: 31
+    },
+    {
+      id: 5,
+      name: "Regal Chain Collection",
+      description: "Sophisticated chain jewelry for special occasions",
+      price: "165000.00",
+      imageUrl: chainImages[4],
+      category: "Collections",
+      featured: true,
+      rating: 5,
+      reviews: 8
+    },
+    {
+      id: 6,
+      name: "Master Craftsman Chain",
+      description: "Premium artisan chain with exceptional detail",
+      price: "145000.00",
+      imageUrl: chainImages[5],
+      category: "Necklaces",
+      featured: true,
+      rating: 5,
+      reviews: 15
+    }
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Video Background Fallback to Image */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-black/40 z-10" /> {/* Dark wash for text contrast */}
-          <img 
-            src={heroImg} 
-            alt="GemEssence Hero" 
-            className="w-full h-full object-cover scale-105 animate-[pulse_20s_ease-in-out_infinite_alternate]"
-          />
-          {/* If you have a real video URL, use this instead:
-          <video autoPlay loop muted playsInline className="w-full h-full object-cover">
-            <source src="YOUR_VIDEO_URL.mp4" type="video/mp4" />
-          </video>
-          */}
-        </div>
-
-        <div className="container relative z-20 mx-auto px-4 text-center flex flex-col items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <span className="text-primary font-bold tracking-[0.3em] uppercase text-sm md:text-base mb-6 block">
-              Modern Opulence
-            </span>
-            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 leading-tight">
-              Discover Your <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-yellow-200 to-primary">
-                True Brilliance
-              </span>
-            </h1>
-            <p className="text-white/80 max-w-2xl mx-auto text-lg md:text-xl font-light mb-10">
-              Curated collections of exquisite jewelry designed to elevate your everyday and immortalize your finest moments.
-            </p>
-            <Link href="#collections">
-              <button className="px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-full hover:bg-primary/90 gold-glow-hover flex items-center gap-2 mx-auto transition-all">
-                Explore Collection <ChevronRight className="w-4 h-4" />
-              </button>
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center animate-bounce">
-          <span className="text-white/60 text-xs uppercase tracking-widest mb-2">Scroll</span>
-          <div className="w-[1px] h-12 bg-gradient-to-b from-primary to-transparent" />
-        </div>
-      </section>
+      {/* Hero Slideshow */}
+      <HeroSlideshow />
 
       {/* Value Props */}
-      <section className="py-20 bg-card border-y border-border">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(201,162,39,0.1),transparent_50%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(128,0,0,0.05),transparent_50%)] pointer-events-none" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="font-display text-4xl md:text-5xl font-bold mb-4 text-dual-accent">
+              Why Choose GemEssence
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Experience the pinnacle of luxury jewelry craftsmanship
+            </p>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
-              { icon: Diamond, title: "Finest Materials", desc: "Ethically sourced diamonds and pure golds." },
-              { icon: Sparkles, title: "Master Craftsmanship", desc: "Forged by artisans with decades of experience." },
-              { icon: ShieldCheck, title: "Lifetime Warranty", desc: "Our commitment to quality, guaranteed forever." }
+              {
+                icon: Diamond,
+                title: "Finest Materials",
+                desc: "Ethically sourced diamonds and pure golds.",
+                color: "from-primary/20 to-primary/5"
+              },
+              {
+                icon: Sparkles,
+                title: "Master Craftsmanship",
+                desc: "Forged by artisans with decades of experience.",
+                color: "from-secondary/20 to-secondary/5"
+              },
+              {
+                icon: ShieldCheck,
+                title: "Lifetime Warranty",
+                desc: "Our commitment to quality, guaranteed forever.",
+                color: "from-primary/20 to-primary/5"
+              },
             ].map((prop, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
-                className="flex flex-col items-center text-center p-6"
+                transition={{ delay: i * 0.2, duration: 0.6 }}
+                whileHover={{ y: -10, scale: 1.02 }}
+                className="group relative"
               >
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6">
-                  <prop.icon className="w-8 h-8" />
+                <div className={`absolute inset-0 bg-gradient-to-br ${prop.color} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className="relative flex flex-col items-center text-center p-8 glass-panel rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300">
+                  <motion.div 
+                    className="w-20 h-20 rounded-full bg-dual-accent flex items-center justify-center text-white mb-6 shadow-lg"
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <prop.icon className="w-10 h-10" />
+                  </motion.div>
+                  <h3 className="font-display text-xl font-bold mb-3 text-dual-accent group-hover:text-primary transition-colors">
+                    {prop.title}
+                  </h3>
+                  <p className="text-muted-foreground group-hover:text-foreground transition-colors">
+                    {prop.desc}
+                  </p>
                 </div>
-                <h3 className="font-display text-xl font-bold mb-3">{prop.title}</h3>
-                <p className="text-muted-foreground">{prop.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -112,8 +228,12 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div>
-              <span className="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">Curated For You</span>
-              <h2 className="font-display text-4xl md:text-5xl font-bold">Featured Pieces</h2>
+              <span className="text-primary font-bold tracking-widest uppercase text-sm mb-2 block">
+                Curated For You
+              </span>
+              <h2 className="font-display text-4xl md:text-5xl font-bold">
+                Featured Pieces
+              </h2>
             </div>
             <button className="text-primary font-semibold flex items-center gap-2 hover:gap-4 transition-all">
               View All <ChevronRight className="w-4 h-4" />
@@ -121,82 +241,131 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {isLoading ? (
-              // Skeletons
-              Array(6).fill(0).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-muted aspect-[4/5] rounded-2xl mb-4" />
-                  <div className="h-6 bg-muted rounded w-1/3 mb-2" />
-                  <div className="h-8 bg-muted rounded w-3/4 mb-4" />
-                  <div className="h-4 bg-muted rounded w-full" />
-                </div>
-              ))
-            ) : (
-              displayProducts?.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product as Product} 
-                  onClick={setSelectedProduct} 
-                />
-              ))
-            )}
+            {isLoading
+              ? // Skeletons
+                Array(6)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="bg-muted aspect-[4/5] rounded-2xl mb-4" />
+                      <div className="h-6 bg-muted rounded w-1/3 mb-2" />
+                      <div className="h-8 bg-muted rounded w-3/4 mb-4" />
+                      <div className="h-4 bg-muted rounded w-full" />
+                    </div>
+                  ))
+              : enhancedProducts?.map((product) => (
+                  <InteractiveProductCard
+                    key={product.id}
+                    product={product as Product}
+                    onClick={setSelectedProduct}
+                  />
+                ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto bg-card border-t border-border pt-20 pb-10 relative overflow-hidden">
+      <footer className="mt-auto bg-gold-texture-overlay border-t border-border pt-20 pb-10 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5 pointer-events-none">
-          <img src={footerImg} alt="Texture" className="w-full h-full object-cover" />
+          <img
+            src={footerImg}
+            alt="Texture"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div className="container relative z-10 mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="md:col-span-2">
-              <Link href="/" className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                  <Gem className="w-4 h-4" />
-                </div>
-                <span className="font-display text-2xl font-bold tracking-wider text-foreground">
-                  GemEssence
-                </span>
-              </Link>
-              <p className="text-muted-foreground max-w-sm mb-6 leading-relaxed">
-                Elevating the art of fine jewelry. We craft pieces that capture light, command attention, and celebrate life's most precious moments.
+              <Link href="/" className="flex items-center mb-6">
+              <GemEssenceLogo height={38} />
+            </Link>
+              <p className="text-white/80 max-w-sm mb-6 leading-relaxed">
+                Elevating the art of fine jewelry. We craft pieces that capture
+                light, command attention, and celebrate life's most precious
+                moments.
               </p>
             </div>
             <div>
-              <h4 className="font-bold text-foreground mb-6 uppercase tracking-wider text-sm">Explore</h4>
-              <ul className="space-y-4 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">New Arrivals</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Bestsellers</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Bridal Collection</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">High Jewelry</a></li>
+              <h4 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">
+                Explore
+              </h4>
+              <ul className="space-y-4 text-white/70">
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    New Arrivals
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    Bestsellers
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    Bridal Collection
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    High Jewelry
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-foreground mb-6 uppercase tracking-wider text-sm">Assistance</h4>
-              <ul className="space-y-4 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Shipping & Returns</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Care Guide</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">FAQ</a></li>
+              <h4 className="font-bold text-white mb-6 uppercase tracking-wider text-sm">
+                Assistance
+              </h4>
+              <ul className="space-y-4 text-white/70">
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    Contact Us
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    Shipping & Returns
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    Care Guide
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-primary transition-colors">
+                    FAQ
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
-          <div className="pt-8 border-t border-border/50 text-center text-sm text-muted-foreground flex flex-col md:flex-row justify-between items-center gap-4">
-            <p>&copy; {new Date().getFullYear()} GemEssence. All rights reserved.</p>
+          <div className="pt-8 border-t border-white/20 text-center text-sm text-white/60 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>
+              &copy; {new Date().getFullYear()} GemEssence. All rights reserved.
+            </p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-white transition-colors">
+                Privacy Policy
+              </a>
+              <a href="#" className="hover:text-white transition-colors">
+                Terms of Service
+              </a>
             </div>
           </div>
         </div>
       </footer>
 
+      {/* WhatsApp Floating Button */}
+      <WhatsAppFloatingButton phoneNumber="+254797534189" />
+
+      {/* Floating Action Button */}
+      <FloatingActionButton />
+
       {/* Shared Layout Modal */}
-      <ProductModal 
-        product={selectedProduct} 
-        onClose={() => setSelectedProduct(null)} 
+      <ProductModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
       />
     </div>
   );
