@@ -8,18 +8,19 @@ interface LogoProps {
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export function GemessenceLogo({ className = "", height, width }: LogoProps) {
-  const aspectRatio = 1536 / 1024; // Updated to match official logo dimensions
-  const resolvedHeight = height ?? (width ? Math.round(width / aspectRatio) : 48);
-  const resolvedWidth = width ?? (height ? Math.round(height * aspectRatio) : Math.round(48 * aspectRatio));
+  const aspectRatio = 240 / 50; // SVG aspect ratio
+  const resolvedHeight = height ?? 48;
+  const resolvedWidth = width ?? Math.round(resolvedHeight * aspectRatio);
 
   return (
     <img
-      src={`${BASE}/logo.png`}
+      src={`${BASE}/logo.svg`}
       alt="Gemessence"
       height={resolvedHeight}
       width={resolvedWidth}
       className={`object-contain ${className}`}
       draggable={false}
+      style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' }}
     />
   );
 }
