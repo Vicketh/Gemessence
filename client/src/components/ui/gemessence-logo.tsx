@@ -8,7 +8,7 @@ interface LogoProps {
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export function GemessenceLogo({ className = "", height, width }: LogoProps) {
-  const aspectRatio = 1316 / 530;
+  const aspectRatio = 1536 / 1024; // Updated to match official logo dimensions
   const resolvedHeight = height ?? (width ? Math.round(width / aspectRatio) : 48);
   const resolvedWidth = width ?? (height ? Math.round(height * aspectRatio) : Math.round(48 * aspectRatio));
 
