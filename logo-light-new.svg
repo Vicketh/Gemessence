@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160" fill="none" role="img" aria-label="Gemessence">
+  <defs>
+    <!-- Gold gradients -->
+    <linearGradient id="goldMain-l" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9a7209"/>
+      <stop offset="30%" stop-color="#c9a227"/>
+      <stop offset="60%" stop-color="#e8c84a"/>
+      <stop offset="100%" stop-color="#c9a227"/>
+    </linearGradient>
+    
+    <!-- Dark red gradients -->
+    <linearGradient id="redMain-l" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#800000"/>
+      <stop offset="50%" stop-color="#a00000"/>
+      <stop offset="100%" stop-color="#600000"/>
+    </linearGradient>
+    
+    <!-- Gem gradients -->
+    <linearGradient id="gemGold-l" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8c84a"/>
+      <stop offset="100%" stop-color="#9a7209"/>
+    </linearGradient>
+    
+    <!-- Swoosh gradient -->
+    <linearGradient id="swooshGrad-l" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c9a227"/>
+      <stop offset="30%" stop-color="#800000"/>
+      <stop offset="100%" stop-color="#600000"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Large G Arc (main letterform) -->
+  <!-- Outer gold border -->
+  <path d="M 130,20 A 80,80 0 1,0 130,140 L 130,100 L 90,100 L 90,85 L 145,85 L 145,150 A 95,95 0 1,1 145,10 Z"
+        fill="url(#goldMain-l)" />
+  
+  <!-- Inner red fill -->
+  <path d="M 125,28 A 68,68 0 1,0 125,132 L 125,98 L 98,98 L 98,87 L 137,87 L 137,142 A 83,83 0 1,1 137,18 Z"
+        fill="url(#redMain-l)" />
+
+  <!-- Diamond gem inside G -->
+  <g transform="translate(65, 60)">
+    <!-- Outer gold diamond -->
+    <polygon points="20,0 40,16 20,48 0,16" fill="url(#goldMain-l)"/>
+    
+    <!-- Inner black diamond -->
+    <polygon points="20,3 37,16 20,45 3,16" fill="#1a1a1a"/>
+    
+    <!-- Top gold facet -->
+    <polygon points="20,3 37,16 20,16" fill="url(#gemGold-l)" opacity="0.8"/>
+    
+    <!-- Facet lines -->
+    <line x1="20" y1="3" x2="20" y2="45" stroke="#c9a227" stroke-width="1" opacity="0.7"/>
+    <line x1="3" y1="16" x2="37" y2="16" stroke="#c9a227" stroke-width="1" opacity="0.7"/>
+    
+    <!-- Center highlight -->
+    <polygon points="20,3 28,10 20,16 12,10" fill="#e8c84a" opacity="0.6"/>
+  </g>
+
+  <!-- Script text "Gemessence" -->
+  <text x="160" y="105"
+        font-family="'Palatino Linotype', 'Book Antiqua', Palatino, 'Times New Roman', Georgia, serif"
+        font-size="68" font-weight="700" font-style="italic"
+        fill="#1a1a1a" letter-spacing="-1">Gemessence</text>
+
+  <!-- Red swoosh underline with gold accent -->
+  <!-- Shadow layer -->
+  <path d="M 85,135 Q 170,155 410,140" stroke="#400000" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.4"/>
+  
+  <!-- Main swoosh -->
+  <path d="M 83,131 Q 168,151 408,136" stroke="url(#swooshGrad-l)" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- 8-point star sparkle (top right) -->
+  <g transform="translate(375, 25)">
+    <!-- Main cross axes -->
+    <line x1="12" y1="0" x2="12" y2="24" stroke="#c9a227" stroke-width="2" stroke-linecap="round"/>
+    <line x1="0" y1="12" x2="24" y2="12" stroke="#c9a227" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Diagonal axes -->
+    <line x1="3" y1="3" x2="21" y2="21" stroke="#c9a227" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="21" y1="3" x2="3" y2="21" stroke="#c9a227" stroke-width="1.2" stroke-linecap="round"/>
+    
+    <!-- Center glow -->
+    <circle cx="12" cy="12" r="2.5" fill="#e8c84a"/>
+    <circle cx="12" cy="12" r="1.5" fill="#c9a227"/>
+  </g>
+</svg>
