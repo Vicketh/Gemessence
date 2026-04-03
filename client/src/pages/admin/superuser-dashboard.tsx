@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAdminUsers } from "@/hooks/use-admin-users";
 import {
   Shield, Users, Settings, Phone, CreditCard,
   UserPlus, UserMinus, Save, RefreshCw, MessageCircle,
@@ -18,15 +19,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function SuperUserDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const { data: admins = [], isLoading: adminsLoading } = useQuery<any[]>({
-    queryKey: ["/api/superuser/admins"],
-    queryFn: async () => {
-      const res = await fetch("/api/superuser/admins");
-      if (!res.ok) return [];
-      return res.json();
-    },
-  });
+  const { admins, isLoading: adminsLoading, promoteUser, demoteAdmin } = useAdminUsers();
 
   const { data: settings = {}, isLoading: settingsLoading } = useQuery<Record<string, string>>({
     queryKey: ["/api/superuser/settings"],
@@ -58,30 +51,6 @@ export default function SuperUserDashboard() {
       toast({ title: "Settings saved", description: "App settings updated successfully." });
     },
     onError: () => toast({ title: "Error", description: "Failed to save settings.", variant: "destructive" }),
-  });
-
-  const promoteAdminMutation = useMutation({
-    mutationFn: async (userId: number) => {
-      const res = await fetch(`/api/superuser/admins/${userId}`, { method: "POST" });
-      if (!res.ok) throw new Error("Failed to promote");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/superuser/admins"] });
-      toast({ title: "Admin promoted", description: "User has been granted admin access." });
-    },
-  });
-
-  const demoteAdminMutation = useMutation({
-    mutationFn: async (userId: number) => {
-      const res = await fetch(`/api/superuser/admins/${userId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to demote");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/superuser/admins"] });
-      toast({ title: "Admin removed", description: "Admin access has been revoked." });
-    },
   });
 
   const handleSettingChange = (key: string, value: string) => {
@@ -132,7 +101,7 @@ export default function SuperUserDashboard() {
                 <Button
                   onClick={() => {
                     const admin = admins.find((a: any) => a.username === promoteUsername);
-                    if (admin) promoteAdminMutation.mutate(admin.id);
+                    if (admin) promoteUser(admin.id);
                     else toast({ title: "User not found", variant: "destructive" });
                   }}
                   disabled={!promoteUsername}
@@ -185,7 +154,7 @@ export default function SuperUserDashboard() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => demoteAdminMutation.mutate(admin.id)}>
+                                  <AlertDialogAction onClick={() => demoteAdmin(admin.id)}>
                                     Remove
                                   </AlertDialogAction>
                                 </AlertDialogFooter>

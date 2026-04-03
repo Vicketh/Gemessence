@@ -1,5 +1,5 @@
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,21 +19,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Eye, Package } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Search, Eye, Package, CheckCircle, XCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface OrderItem {
+  id: number;
+  orderNumber: string;
+  customer: string;
+  email: string;
+  total: number;
+  status: string;
+  paymentStatus: string;
+  date: string;
+  items: number;
+  shippingAddress?: string;
+}
 
 export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-
-  // Mock orders data
-  const orders = [
-    { id: 1, orderNumber: "GEM-1234567890-ABC123", customer: "John Doe", email: "john@example.com", total: 125000, status: "processing", paymentStatus: "paid", date: "2024-01-15", items: 2 },
-    { id: 2, orderNumber: "GEM-1234567891-DEF456", customer: "Jane Smith", email: "jane@example.com", total: 85000, status: "pending", paymentStatus: "pending", date: "2024-01-15", items: 1 },
-    { id: 3, orderNumber: "GEM-1234567892-GHI789", customer: "Peter Kimani", email: "peter@example.com", total: 225000, status: "shipped", paymentStatus: "paid", date: "2024-01-14", items: 3 },
-    { id: 4, orderNumber: "GEM-1234567893-JKL012", customer: "Mary Wanjiku", email: "mary@example.com", total: 45000, status: "delivered", paymentStatus: "paid", date: "2024-01-14", items: 1 },
-    { id: 5, orderNumber: "GEM-1234567894-MNO345", customer: "David Omondi", email: "david@example.com", total: 175000, status: "processing", paymentStatus: "paid", date: "2024-01-13", items: 2 },
-    { id: 6, orderNumber: "GEM-1234567895-PQR678", customer: "Sarah Mutua", email: "sarah@example.com", total: 95000, status: "cancelled", paymentStatus: "refunded", date: "2024-01-12", items: 1 },
-  ];
+  const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const [orders, setOrders] = useState<OrderItem[]>([
+    { id: 1, orderNumber: "GEM-1234567890-ABC123", customer: "John Doe", email: "john@example.com", total: 125000, status: "processing", paymentStatus: "paid", date: "2024-01-15", items: 2, shippingAddress: "Nairobi, Kenya" },
+    { id: 2, orderNumber: "GEM-1234567891-DEF456", customer: "Jane Smith", email: "jane@example.com", total: 85000, status: "pending", paymentStatus: "pending", date: "2024-01-15", items: 1, shippingAddress: "Mombasa, Kenya" },
+    { id: 3, orderNumber: "GEM-1234567892-GHI789", customer: "Peter Kimani", email: "peter@example.com", total: 225000, status: "shipped", paymentStatus: "paid", date: "2024-01-14", items: 3, shippingAddress: "Kisumu, Kenya" },
+    { id: 4, orderNumber: "GEM-1234567893-JKL012", customer: "Mary Wanjiku", email: "mary@example.com", total: 45000, status: "delivered", paymentStatus: "paid", date: "2024-01-14", items: 1, shippingAddress: "Nakuru, Kenya" },
+    { id: 5, orderNumber: "GEM-1234567894-MNO345", customer: "David Omondi", email: "david@example.com", total: 175000, status: "processing", paymentStatus: "paid", date: "2024-01-13", items: 2, shippingAddress: "Thika, Kenya" },
+    { id: 6, orderNumber: "GEM-1234567895-PQR678", customer: "Sarah Mutua", email: "sarah@example.com", total: 95000, status: "cancelled", paymentStatus: "refunded", date: "2024-01-12", items: 1, shippingAddress: "Eldoret, Kenya" },
+  ]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-KE", {

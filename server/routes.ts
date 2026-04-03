@@ -796,6 +796,207 @@ export async function registerRoutes(
     res.json(CHAIN_LENGTHS);
   });
 
+  // ==================== ADMIN ROUTES ====================
+  
+  // Get admin order statistics
+  app.get("/api/admin/orders/stats", async (req, res) => {
+    try {
+      // For MVP, return basic stats
+      // In production, would calculate from actual data
+      res.json({
+        totalRevenue: 245000,
+        totalOrders: 42,
+        pendingOrders: 8,
+        completedOrders: 28,
+        averageOrderValue: 5833.33,
+      });
+    } catch { res.status(500).json({ message: "Failed to fetch order stats" }); }
+  });
+
+  // Get all orders (admin view)
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      // For MVP, this would be an admin-restricted endpoint
+      // In production, would fetch all orders with filters
+      res.json([]);
+    } catch { res.status(500).json({ message: "Failed to fetch orders" }); }
+  });
+
+  // Update order status (admin)
+  app.patch("/api/admin/orders/:orderId/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      const order = await storage.updateOrderStatus(Number(req.params.orderId), status);
+      res.json(order);
+    } catch { res.status(500).json({ message: "Failed to update order status" }); }
+  });
+
+  // Approve/Reject order (admin)
+  app.post("/api/admin/orders/:orderId/approve", async (req, res) => {
+    try {
+      const order = await storage.updateOrderStatus(Number(req.params.orderId), "processing");
+      res.json({ success: true, order });
+    } catch { res.status(500).json({ message: "Failed to approve order" }); }
+  });
+
+  app.post("/api/admin/orders/:orderId/reject", async (req, res) => {
+    try {
+      const order = await storage.updateOrderStatus(Number(req.params.orderId), "cancelled");
+      res.json({ success: true, order });
+    } catch { res.status(500).json({ message: "Failed to reject order" }); }
+  });
+
+  // Admin product management
+  
+  // Update product
+  app.put(api.products.get.path.replace(":id", ":productId"), async (req, res) => {
+    try {
+      const { name, price, description, category, inStock, stockQuantity, featured } = req.body;
+      const product = await storage.updateProduct(Number(req.params.productId), {
+        name,
+        price,
+        description,
+        category,
+        inStock,
+        stockQuantity,
+        featured,
+        updatedAt: new Date(),
+      } as any);
+      res.json(product);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
+  // Delete product
+  app.delete(api.products.get.path.replace(":id", ":productId"), async (req, res) => {
+    try {
+      await storage.deleteProduct(Number(req.params.productId));
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to delete product" }); }
+  });
+
+  // Admin discount management
+
+  // Create discount
+  app.post("/api/admin/discounts", async (req, res) => {
+    try {
+      const { productId, discountType, discountValue, startDate, endDate } = req.body;
+      const userId = (req as any).session?.userId || 1;
+      
+      const discount = await storage.createProductDiscount({
+        productId,
+        discountType,
+        discountValue,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        createdBy: userId,
+      });
+      
+      res.status(201).json(discount);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to create discount" });
+    }
+  });
+
+  // Get active discounts
+  app.get("/api/admin/discounts", async (req, res) => {
+    try {
+      const discounts = await storage.getActiveDiscounts();
+      res.json(discounts);
+    } catch { res.status(500).json({ message: "Failed to fetch discounts" }); }
+  });
+
+  // Update discount
+  app.patch("/api/admin/discounts/:discountId", async (req, res) => {
+    try {
+      const discount = await storage.updateDiscount(Number(req.params.discountId), req.body);
+      res.json(discount);
+    } catch { res.status(500).json({ message: "Failed to update discount" }); }
+  });
+
+  // Deactivate discount
+  app.post("/api/admin/discounts/:discountId/deactivate", async (req, res) => {
+    try {
+      const discount = await storage.deactivateDiscount(Number(req.params.discountId));
+      res.json(discount);
+    } catch { res.status(500).json({ message: "Failed to deactivate discount" }); }
+  });
+
+  // Delete discount
+  app.delete("/api/admin/discounts/:discountId", async (req, res) => {
+    try {
+      await storage.deleteDiscount(Number(req.params.discountId));
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to delete discount" }); }
+  });
+
+  // Admin role and permission management
+
+  // Get all admin roles
+  app.get("/api/admin/roles", async (req, res) => {
+    try {
+      const roles = await storage.getAdminRoles();
+      res.json(roles);
+    } catch { res.status(500).json({ message: "Failed to fetch roles" }); }
+  });
+
+  // Create admin role
+  app.post("/api/admin/roles", async (req, res) => {
+    try {
+      const { name, description } = req.body;
+      const role = await storage.createAdminRole(name, description);
+      res.status(201).json(role);
+    } catch { res.status(500).json({ message: "Failed to create role" }); }
+  });
+
+  // Get all permissions
+  app.get("/api/admin/permissions", async (req, res) => {
+    try {
+      const permissions = await storage.getPermissions();
+      res.json(permissions);
+    } catch { res.status(500).json({ message: "Failed to fetch permissions" }); }
+  });
+
+  // Create permission
+  app.post("/api/admin/permissions", async (req, res) => {
+    try {
+      const { name, description, category } = req.body;
+      const permission = await storage.createPermission(name, description, category);
+      res.status(201).json(permission);
+    } catch { res.status(500).json({ message: "Failed to create permission" }); }
+  });
+
+  // Add permission to role
+  app.post("/api/admin/roles/:roleId/permissions/:permissionId", async (req, res) => {
+    try {
+      const mapping = await storage.addPermissionToRole(
+        Number(req.params.roleId),
+        Number(req.params.permissionId)
+      );
+      res.status(201).json(mapping);
+    } catch { res.status(500).json({ message: "Failed to add permission to role" }); }
+  });
+
+  // Remove permission from role
+  app.delete("/api/admin/roles/:roleId/permissions/:permissionId", async (req, res) => {
+    try {
+      await storage.removePermissionFromRole(
+        Number(req.params.roleId),
+        Number(req.params.permissionId)
+      );
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to remove permission from role" }); }
+  });
+
+  // Get role permissions
+  app.get("/api/admin/roles/:roleId/permissions", async (req, res) => {
+    try {
+      const permissions = await storage.getRolePermissions(Number(req.params.roleId));
+      res.json(permissions);
+    } catch { res.status(500).json({ message: "Failed to fetch role permissions" }); }
+  });
+
   // ==================== SUPERUSER ROUTES ====================
   // Get all admins
   app.get("/api/superuser/admins", async (req, res) => {

@@ -231,6 +231,61 @@ export const appSettings = pgTable("app_settings", {
 });
 
 // ============================================
+// ADMIN ROLES TABLE
+// ============================================
+export const adminRoles = pgTable("admin_roles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // "super_admin", "admin", "manager", etc.
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ============================================
+// ADMIN PERMISSIONS TABLE
+// ============================================
+export const adminPermissions = pgTable("admin_permissions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // "manage_products", "approve_orders", "manage_admins", etc.
+  description: text("description"),
+  category: text("category"), // "products", "orders", "users", "system"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ============================================
+// ROLE PERMISSIONS MAPPING TABLE
+// ============================================
+export const rolePermissions = pgTable("role_permissions", {
+  id: serial("id").primaryKey(),
+  roleId: integer("role_id")
+    .notNull()
+    .references(() => adminRoles.id),
+  permissionId: integer("permission_id")
+    .notNull()
+    .references(() => adminPermissions.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ============================================
+// PRODUCT DISCOUNTS TABLE
+// ============================================
+export const productDiscounts = pgTable("product_discounts", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id")
+    .notNull()
+    .references(() => products.id),
+  discountType: text("discount_type").notNull(), // "percentage" or "fixed"
+  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdBy: integer("created_by")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================
 // INSERT SCHEMAS (for creating records)
 // ============================================
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -294,6 +349,27 @@ export const insertShippingZoneSchema = createInsertSchema(shippingZones).omit({
   id: true,
 });
 
+export const insertAdminRoleSchema = createInsertSchema(adminRoles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAdminPermissionSchema = createInsertSchema(adminPermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProductDiscountSchema = createInsertSchema(productDiscounts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // ============================================
 // SELECT SCHEMAS (for reading records)
 // ============================================
@@ -307,6 +383,10 @@ export const selectWishlistSchema = createSelectSchema(wishlist);
 export const selectOrderSchema = createSelectSchema(orders);
 export const selectOrderItemSchema = createSelectSchema(orderItems);
 export const selectShippingZoneSchema = createSelectSchema(shippingZones);
+export const selectAdminRoleSchema = createSelectSchema(adminRoles);
+export const selectAdminPermissionSchema = createSelectSchema(adminPermissions);
+export const selectRolePermissionSchema = createSelectSchema(rolePermissions);
+export const selectProductDiscountSchema = createSelectSchema(productDiscounts);
 
 // ============================================
 // API TYPES
@@ -327,6 +407,14 @@ export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type ShippingZone = typeof shippingZones.$inferSelect;
+export type AdminRole = typeof adminRoles.$inferSelect;
+export type InsertAdminRole = z.infer<typeof insertAdminRoleSchema>;
+export type AdminPermission = typeof adminPermissions.$inferSelect;
+export type InsertAdminPermission = z.infer<typeof insertAdminPermissionSchema>;
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+export type ProductDiscount = typeof productDiscounts.$inferSelect;
+export type InsertProductDiscount = z.infer<typeof insertProductDiscountSchema>;
 
 // ============================================
 // REQUEST/RESPONSE TYPES
@@ -377,6 +465,29 @@ export type MpesaPaymentResponse = {
   success: boolean;
   checkoutId?: string;
   message?: string;
+};
+
+// ============================================
+// ADMIN SYSTEM TYPES
+// ============================================
+export type AdminPermissionsMap = {
+  manage_products: boolean;
+  approve_orders: boolean;
+  manage_admins: boolean;
+  manage_users: boolean;
+  manage_discounts: boolean;
+  manage_categories: boolean;
+  view_analytics: boolean;
+  manage_settings: boolean;
+};
+
+export type AdminUser = User & {
+  permissions?: string[];
+  role?: AdminRole;
+};
+
+export type AdminRoleWithPermissions = AdminRole & {
+  permissions: AdminPermission[];
 };
 
 // Kenyan counties for shipping

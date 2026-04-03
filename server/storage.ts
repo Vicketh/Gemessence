@@ -11,6 +11,10 @@ import {
   reviews,
   shippingZones,
   appSettings,
+  adminRoles,
+  adminPermissions,
+  rolePermissions,
+  productDiscounts,
   type User,
   type InsertUser,
   type Product,
@@ -27,6 +31,9 @@ import {
   type Review,
   type InsertReview,
   type ShippingZone,
+  type AdminRole,
+  type AdminPermission,
+  type ProductDiscount,
   type ProductWithCategory,
   type CartWithItems,
   type OrderWithItems,
@@ -848,6 +855,132 @@ export class DatabaseStorage implements IStorage {
 
   async getAdmins(): Promise<User[]> {
     return await db.select().from(users).where(eq(users.isAdmin, true));
+  }
+
+  // ============================================
+  // ADMIN ROLES & PERMISSIONS
+  // ============================================
+  async getAdminRoles() {
+    const { adminRoles, rolePermissions, adminPermissions } = await import("@shared/schema");
+    return await db.select().from(adminRoles);
+  }
+
+  async createAdminRole(name: string, description?: string) {
+    const { adminRoles } = await import("@shared/schema");
+    const [role] = await db.insert(adminRoles).values({ name, description }).returning();
+    return role;
+  }
+
+  async addPermissionToRole(roleId: number, permissionId: number) {
+    const { rolePermissions } = await import("@shared/schema");
+    const [mapping] = await db.insert(rolePermissions).values({ roleId, permissionId }).returning();
+    return mapping;
+  }
+
+  async removePermissionFromRole(roleId: number, permissionId: number) {
+    const { rolePermissions } = await import("@shared/schema");
+    await db.delete(rolePermissions).where(
+      and(
+        eq(rolePermissions.roleId, roleId),
+        eq(rolePermissions.permissionId, permissionId)
+      )
+    );
+  }
+
+  async getPermissions() {
+    const { adminPermissions } = await import("@shared/schema");
+    return await db.select().from(adminPermissions);
+  }
+
+  async createPermission(name: string, description?: string, category?: string) {
+    const { adminPermissions } = await import("@shared/schema");
+    const [permission] = await db.insert(adminPermissions).values({ name, description, category }).returning();
+    return permission;
+  }
+
+  async getRolePermissions(roleId: number) {
+    const { rolePermissions, adminPermissions } = await import("@shared/schema");
+    return await db
+      .select({ permission: adminPermissions })
+      .from(rolePermissions)
+      .innerJoin(adminPermissions, eq(rolePermissions.permissionId, adminPermissions.id))
+      .where(eq(rolePermissions.roleId, roleId));
+  }
+
+  // ============================================
+  // PRODUCT DISCOUNTS
+  // ============================================
+  async createProductDiscount(data: {
+    productId: number;
+    discountType: 'percentage' | 'fixed';
+    discountValue: string;
+    startDate: Date;
+    endDate: Date;
+    createdBy: number;
+  }) {
+    const { productDiscounts } = await import("@shared/schema");
+    const [discount] = await db.insert(productDiscounts).values({
+      productId: data.productId,
+      discountType: data.discountType,
+      discountValue: data.discountValue,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      isActive: true,
+      createdBy: data.createdBy,
+    }).returning();
+    return discount;
+  }
+
+  async getProductDiscount(productId: number) {
+    const { productDiscounts } = await import("@shared/schema");
+    const now = new Date();
+    const [discount] = await db
+      .select()
+      .from(productDiscounts)
+      .where(
+        and(
+          eq(productDiscounts.productId, productId),
+          eq(productDiscounts.isActive, true),
+          sql`${productDiscounts.startDate} <= ${now}`,
+          sql`${productDiscounts.endDate} >= ${now}`
+        )
+      )
+      .limit(1);
+    return discount;
+  }
+
+  async getActiveDiscounts() {
+    const { productDiscounts } = await import("@shared/schema");
+    const now = new Date();
+    return await db
+      .select()
+      .from(productDiscounts)
+      .where(
+        and(
+          eq(productDiscounts.isActive, true),
+          sql`${productDiscounts.startDate} <= ${now}`,
+          sql`${productDiscounts.endDate} >= ${now}`
+        )
+      );
+  }
+
+  async updateDiscount(id: number, data: Partial<any>) {
+    const { productDiscounts } = await import("@shared/schema");
+    const [discount] = await db
+      .update(productDiscounts)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(productDiscounts.id, id))
+      .returning();
+    return discount;
+  }
+
+  async deactivateDiscount(id: number) {
+    return await this.updateDiscount(id, { isActive: false });
+  }
+
+  async deleteDiscount(id: number) {
+    const { productDiscounts } = await import("@shared/schema");
+    await db.delete(productDiscounts).where(eq(productDiscounts.id, id));
   }
 }
 
