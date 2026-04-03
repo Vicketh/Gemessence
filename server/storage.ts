@@ -10,6 +10,7 @@ import {
   orderItems,
   reviews,
   shippingZones,
+  appSettings,
   type User,
   type InsertUser,
   type Product,
@@ -148,6 +149,11 @@ export interface IStorage {
   // Shipping Zones
   getShippingZones(): Promise<ShippingZone[]>;
   getShippingCost(county: string): Promise<number>;
+
+  // Settings
+  getSettings(): Promise<Record<string, string>>;
+  updateSettings(data: Record<string, string>): Promise<Record<string, string>>;
+  getAdmins(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -819,7 +825,29 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(shippingZones)
       .where(eq(shippingZones.county, county));
-    return zone ? parseFloat(zone.cost) : 500; // Default shipping cost
+    return zone ? parseFloat(zone.cost) : 500;
+  }
+
+  // ==================== SETTINGS ====================
+  async getSettings(): Promise<Record<string, string>> {
+    const rows = await db.select().from(appSettings);
+    return Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  }
+
+  async updateSettings(data: Record<string, string>): Promise<Record<string, string>> {
+    for (const [key, value] of Object.entries(data)) {
+      const existing = await db.select().from(appSettings).where(eq(appSettings.key, key));
+      if (existing.length > 0) {
+        await db.update(appSettings).set({ value, updatedAt: new Date() }).where(eq(appSettings.key, key));
+      } else {
+        await db.insert(appSettings).values({ key, value });
+      }
+    }
+    return this.getSettings();
+  }
+
+  async getAdmins(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.isAdmin, true));
   }
 }
 

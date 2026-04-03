@@ -1,24 +1,27 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const heroImages = [
   {
-    src: "/Gemini_Generated_Image_b8tezgb8tezgb8te.png",
+    src: `${BASE}/Gemini_Generated_Image_b8tezgb8tezgb8te.png`,
     alt: "Luxury jewelry collection showcase",
     title: "Exquisite Craftsmanship",
     subtitle: "Discover our premium collection of handcrafted jewelry"
   },
   {
-    src: "/Gemini_Generated_Image_kjeodwkjeodwkjeo.png", 
+    src: `${BASE}/Gemini_Generated_Image_kjeodwkjeodwkjeo.png`,
     alt: "Premium gold jewelry display",
     title: "Royal Gold Collection",
     subtitle: "Timeless elegance meets modern sophistication"
   },
   {
-    src: "/Gemini_Generated_Image_qkhmuyqkhmuyqkhm.png",
+    src: `${BASE}/Gemini_Generated_Image_qkhmuyqkhmuyqkhm.png`,
     alt: "Fine jewelry artisan workspace",
-    title: "Artisan Excellence", 
+    title: "Artisan Excellence",
     subtitle: "Each piece tells a story of passion and precision"
   }
 ];
@@ -93,8 +96,9 @@ export function HeroSlideshow() {
           <Button 
             size="lg" 
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg gold-glow-hover"
+            asChild
           >
-            Explore Collection
+            <Link href="/#collections">Explore Collection</Link>
           </Button>
         </div>
       </div>

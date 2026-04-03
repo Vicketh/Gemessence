@@ -18,6 +18,7 @@ import WishlistPage from "@/pages/wishlist";
 import AdminDashboardNew from "@/pages/admin/admin-dashboard-new";
 import AdminProducts from "@/pages/admin/products";
 import AdminOrders from "@/pages/admin/orders";
+import SuperUserDashboard from "@/pages/admin/superuser-dashboard";
 
 function Router() {
   return (
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboardNew} />
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/orders" component={AdminOrders} />
+      <Route path="/admin/superuser" component={SuperUserDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

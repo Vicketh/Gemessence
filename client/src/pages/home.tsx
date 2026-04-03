@@ -21,6 +21,8 @@ import {
 import { Link } from "wouter";
 import footerImg from "@assets/Footer_1772877259305.png";
 
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 export default function Home() {
   const { data: products, isLoading } = useProducts();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -66,12 +68,12 @@ export default function Home() {
 
   // Chain product images for new products
   const chainImages = [
-    "/Chain Ch.00_03_24_22.Still032.jpg",
-    "/Chain Ch.00_03_26_01.Still031.jpg", 
-    "/Chain Ch.00_03_27_03.Still030.jpg",
-    "/Chain Ch.00_03_28_06.Still029.jpg",
-    "/Chain Ch.00_03_29_07.Still028.jpg",
-    "/Chain Ch.00_03_30_02.Still027.jpg"
+    `${BASE}/Chain Ch.00_03_24_22.Still032.jpg`,
+    `${BASE}/Chain Ch.00_03_26_01.Still031.jpg`,
+    `${BASE}/Chain Ch.00_03_27_03.Still030.jpg`,
+    `${BASE}/Chain Ch.00_03_28_06.Still029.jpg`,
+    `${BASE}/Chain Ch.00_03_29_07.Still028.jpg`,
+    `${BASE}/Chain Ch.00_03_30_02.Still027.jpg`
   ];
 
   // Enhanced product data with chain images
@@ -447,7 +449,7 @@ export default function Home() {
       </footer>
 
       {/* WhatsApp Floating Button */}
-      <WhatsAppFloatingButton phoneNumber="+254797534189" />
+      <WhatsAppFloatingButton />
 
       {/* Floating Action Button */}
       <FloatingActionButton />

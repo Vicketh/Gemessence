@@ -1,23 +1,29 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 
-interface WhatsAppFloatingButtonProps {
-  phoneNumber?: string;
-  message?: string;
-}
-
-export function WhatsAppFloatingButton({ 
-  phoneNumber = "+254797534189",
-  message = "Hello! I'm interested in your jewelry collection."
-}: WhatsAppFloatingButtonProps) {
+export function WhatsAppFloatingButton() {
   const [isHovered, setIsHovered] = useState(false);
+
+  const { data: settings } = useQuery<Record<string, string>>({
+    queryKey: ["/api/superuser/settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/superuser/settings");
+      if (!res.ok) return {};
+      return res.json();
+    },
+    staleTime: 60000,
+  });
+
+  const phoneNumber = settings?.whatsapp_number || "+254797534189";
+  const message = settings?.whatsapp_message || "Hello! I'm interested in your jewelry collection.";
 
   const handleWhatsAppClick = () => {
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+    const clean = phoneNumber.replace(/[^0-9]/g, "");
+    window.open(`https://wa.me/${clean}?text=${encodedMessage}`, "_blank");
   };
 
   return (

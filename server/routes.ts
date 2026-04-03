@@ -55,6 +55,20 @@ async function seedDatabase() {
     console.log("Admin user created");
   }
 
+  // Create superuser
+  const existingSuperUser = await storage.getUserByUsername("superuser");
+  if (!existingSuperUser) {
+    await storage.createUser({
+      username: "superuser",
+      email: "superuser@gemessence.co.ke",
+      password: "GemSuper@2025!",
+    } as any);
+    // Set superuser flags directly
+    const su = await storage.getUserByUsername("superuser");
+    if (su) await storage.updateUser(su.id, { isAdmin: true, isSuperUser: true } as any);
+    console.log("Superuser created — username: superuser, password: GemSuper@2025!");
+  }
+
   // Seed categories first
   const existingCategories = await storage.getCategories();
   if (existingCategories.length === 0) {
@@ -258,6 +272,7 @@ export async function registerRoutes(
         email: user.email,
         isVerified: user.isVerified,
         isAdmin: user.isAdmin,
+        isSuperUser: (user as any).isSuperUser ?? false,
         phone: user.phone,
         address: user.address,
         city: user.city,
@@ -293,6 +308,7 @@ export async function registerRoutes(
         email: user.email,
         isVerified: user.isVerified,
         isAdmin: user.isAdmin,
+        isSuperUser: (user as any).isSuperUser ?? false,
         phone: user.phone,
         address: user.address,
         city: user.city,
@@ -778,6 +794,47 @@ export async function registerRoutes(
 
   app.get(api.config.chainLengths.path, (req, res) => {
     res.json(CHAIN_LENGTHS);
+  });
+
+  // ==================== SUPERUSER ROUTES ====================
+  // Get all admins
+  app.get("/api/superuser/admins", async (req, res) => {
+    try {
+      const admins = await storage.getAdmins();
+      res.json(admins);
+    } catch { res.status(500).json({ message: "Failed to fetch admins" }); }
+  });
+
+  // Promote user to admin
+  app.post("/api/superuser/admins/:userId", async (req, res) => {
+    try {
+      const user = await storage.updateUser(Number(req.params.userId), { isAdmin: true } as any);
+      res.json(user);
+    } catch { res.status(500).json({ message: "Failed to promote user" }); }
+  });
+
+  // Demote admin
+  app.delete("/api/superuser/admins/:userId", async (req, res) => {
+    try {
+      const user = await storage.updateUser(Number(req.params.userId), { isAdmin: false } as any);
+      res.json(user);
+    } catch { res.status(500).json({ message: "Failed to demote admin" }); }
+  });
+
+  // Get app settings
+  app.get("/api/superuser/settings", async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings);
+    } catch { res.status(500).json({ message: "Failed to fetch settings" }); }
+  });
+
+  // Update app settings
+  app.put("/api/superuser/settings", async (req, res) => {
+    try {
+      const settings = await storage.updateSettings(req.body);
+      res.json(settings);
+    } catch { res.status(500).json({ message: "Failed to update settings" }); }
   });
 
   // Seed data on startup

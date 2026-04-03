@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   isVerified: boolean("is_verified").default(false),
   isAdmin: boolean("is_admin").default(false),
+  isSuperUser: boolean("is_super_user").default(false),
   phone: text("phone"),
   address: text("address"),
   city: text("city"),
@@ -217,6 +218,16 @@ export const shippingZones = pgTable("shipping_zones", {
   county: text("county").notNull().unique(),
   cost: numeric("cost", { precision: 10, scale: 2 }).notNull(),
   estimatedDays: integer("estimated_days").default(3),
+});
+
+// ============================================
+// APP SETTINGS TABLE
+// ============================================
+export const appSettings = pgTable("app_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // ============================================

@@ -12,8 +12,8 @@ import {
   Menu,
   X,
   LogOut,
-  TrendingUp,
   FileText,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,8 +35,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Check if user is admin (check username === 'admin')
-  if (!user || user.username !== "admin") {
+  // Allow admin or superuser
+  if (!user || (!user.isAdmin && !(user as any).isSuperUser)) {
     setLocation("/");
     return null;
   }
@@ -88,6 +88,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 {item.name}
               </Link>
             ))}
+            {(user as any)?.isSuperUser && (
+              <Link
+                href="/admin/superuser"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium hover:bg-primary/10 hover:text-primary transition-colors border border-primary/20 mt-2"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Shield className="w-5 h-5 text-primary" />
+                Superuser Panel
+              </Link>
+            )}
           </nav>
 
           {/* User section */}

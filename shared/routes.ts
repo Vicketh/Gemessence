@@ -28,6 +28,7 @@ const userResponseSchema = z.object({
   email: z.string(),
   isVerified: z.boolean().nullable(),
   isAdmin: z.boolean().nullable(),
+  isSuperUser: z.boolean().nullable(),
   phone: z.string().nullable(),
   address: z.string().nullable(),
   city: z.string().nullable(),
