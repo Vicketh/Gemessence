@@ -1,4 +1,4 @@
-# GemEssence E-Commerce Implementation Summary
+# Gemessence E-Commerce Implementation Summary
 
 ## Overview
 A full-featured e-commerce platform for a luxury jewelry store in Kenya, built with React, Express, PostgreSQL, and Drizzle ORM.
@@ -227,4 +227,4 @@ For MVP, user with ID=1 is treated as admin. Access admin dashboard at `/admin`.
 
 ---
 
-Built with ❤️ for GemEssence Kenya
+Built with ❤️ for Gemessence Kenya

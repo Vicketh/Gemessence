@@ -1,4 +1,4 @@
-# 💎 GemEssence - Luxury Jewelry E-Commerce Platform
+# 💎 Gemessence - Luxury Jewelry E-Commerce Platform
 
 A premium jewelry e-commerce platform built with modern web technologies, featuring a sophisticated dark theme with royal gold and dark red accents.
 
@@ -51,8 +51,8 @@ A premium jewelry e-commerce platform built with modern web technologies, featur
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Vicketh/GemEssence.git
-   cd GemEssence
+   git clone https://github.com/Vicketh/Gemessence.git
+   cd Gemessence
    ```
 
 2. **Install dependencies**
@@ -91,7 +91,7 @@ A premium jewelry e-commerce platform built with modern web technologies, featur
 ## 📁 Project Structure
 
 ```
-GemEssence/
+Gemessence/
 ├── client/                 # Frontend React application
 │   ├── public/            # Static assets and images
 │   ├── src/
@@ -200,4 +200,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for luxury jewelry enthusiasts**
 
-*GemEssence - Where craftsmanship meets digital excellence*
+*Gemessence - Where craftsmanship meets digital excellence*

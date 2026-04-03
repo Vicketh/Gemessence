@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/layout/navbar";
 import { ProductCard } from "@/components/product-card";
 import { ProductModal } from "@/components/product-modal";
-import { GemEssenceLogo } from "@/components/ui/gemessence-logo";
+import { GemessenceLogo } from "@/components/ui/gemessence-logo";
 import { HeroSlideshow } from "@/components/ui/hero-slideshow";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { WhatsAppFloatingButton } from "@/components/ui/whatsapp-floating-button";
@@ -277,7 +277,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="md:col-span-2">
               <Link href="/" className="flex items-center mb-6">
-              <GemEssenceLogo height={38} />
+              <GemessenceLogo height={38} />
             </Link>
               <p className="text-white/80 max-w-sm mb-6 leading-relaxed">
                 Elevating the art of fine jewelry. We craft pieces that capture

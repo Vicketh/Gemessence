@@ -72,7 +72,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                 <p className="leading-relaxed text-base">{product.description}</p>
                 <p className="mt-4">
                   Crafted with precision and designed to make a statement. 
-                  Every piece in the GemEssence collection embodies modern opulence 
+                  Every piece in the Gemessence collection embodies modern opulence 
                   and timeless elegance.
                 </p>
               </div>

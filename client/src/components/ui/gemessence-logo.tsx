@@ -9,7 +9,7 @@ interface LogoProps {
   width?: number;
 }
 
-export function GemEssenceLogo({
+export function GemessenceLogo({
   variant = "full",
   className = "",
   height,

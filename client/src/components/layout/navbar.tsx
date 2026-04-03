@@ -3,7 +3,7 @@ import { ThemeToggle } from "../ui/theme-toggle";
 import { CurrencyToggle } from "../ui/currency-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { GemEssenceLogo } from "@/components/ui/gemessence-logo";
+import { GemessenceLogo } from "@/components/ui/gemessence-logo";
 import {
   LogOut,
   User,
@@ -50,7 +50,7 @@ export function Navbar() {
       {/* Row 1: Logo top-left + action icons top-right */}
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between py-3">
         <Link href="/" className="flex items-center group">
-          <GemEssenceLogo width={160} className="group-hover:opacity-90 transition-opacity" />
+          <GemessenceLogo width={160} className="group-hover:opacity-90 transition-opacity" />
         </Link>
 
         <div className="flex items-center gap-2 md:gap-4">

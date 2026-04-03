@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { GemEssenceLogo } from "@/components/ui/gemessence-logo";
+import { GemessenceLogo } from "@/components/ui/gemessence-logo";
 import {
   LayoutDashboard,
   Package,
@@ -62,7 +62,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-border">
             <Link href="/admin" className="flex items-center">
-              <GemEssenceLogo height={28} />
+              <GemessenceLogo height={28} />
               <span className="ml-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Admin</span>
             </Link>
             <Button
