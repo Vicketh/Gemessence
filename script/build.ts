@@ -1,6 +1,6 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile, copyFile } from "fs/promises";
+import { rm, readFile, copyFile, writeFile } from "fs/promises";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -40,6 +40,7 @@ async function buildAll() {
 
   // Ensure SPA fallback on GitHub Pages for client-side routing
   await copyFile("dist/public/index.html", "dist/public/404.html");
+  await writeFile("dist/public/.nojekyll", "", "utf-8");
 
   console.log("building server...");
   const pkg = JSON.parse(await readFile("package.json", "utf-8"));
