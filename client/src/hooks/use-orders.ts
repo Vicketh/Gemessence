@@ -34,10 +34,8 @@ export function useOrders(userId?: number) {
 
   const getOrderQuery = useQuery({
     queryKey: [api.orders.get.path],
-    queryFn: async (orderId: number) => {
-      const res = await fetch(`${api.orders.get.path.replace(':id', String(orderId))}`);
-      if (!res.ok) return null;
-      return res.json();
+    queryFn: async () => {
+      return null;
     },
     enabled: false,
   });

@@ -29,7 +29,7 @@ export default function WishlistPage() {
     );
   }
 
-  const wishlistProducts = wishlist?.map((item) => item.product).filter(Boolean) || [];
+  const wishlistProducts = wishlist?.map((item: any) => item.product).filter(Boolean) || [];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -57,7 +57,7 @@ export default function WishlistPage() {
               </div>
             ) : wishlistProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {wishlistProducts.map((product, index) => (
+                {wishlistProducts.map((product: any, index: number) => (
                   <motion.div
                     key={product.id}
                     initial={{ opacity: 0, y: 20 }}

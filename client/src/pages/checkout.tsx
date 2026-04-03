@@ -364,7 +364,7 @@ export default function CheckoutPage() {
 
                       {/* Cart Items */}
                       <div className="space-y-3 max-h-64 overflow-y-auto">
-                        {cart.items.map((item) => (
+                        {cart.items.map((item: any) => (
                           <div key={item.id} className="flex gap-3">
                             <div className="w-16 h-16 rounded bg-muted flex-shrink-0">
                               <img

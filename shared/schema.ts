@@ -7,6 +7,7 @@ import {
   numeric,
   integer,
   jsonb,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -31,13 +32,14 @@ export const users = pgTable("users", {
 // ============================================
 // CATEGORIES TABLE
 // ============================================
-export const categories = pgTable("categories", {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const categories: any = pgTable("categories", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
   imageUrl: text("image_url"),
-  parentId: integer("parent_id").references(() => categories.id),
+  parentId: integer("parent_id").references((): AnyPgColumn => categories.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

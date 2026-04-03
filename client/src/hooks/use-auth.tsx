@@ -1,6 +1,7 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, type RegisterRequest, type LoginRequest } from "@shared/routes";
+import { api } from "@shared/routes";
+import type { RegisterRequest, LoginRequest } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { z } from "zod";

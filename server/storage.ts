@@ -206,11 +206,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCategory(insertCategory: InsertCategory): Promise<Category> {
-    const [category] = await db
+    const result = await db
       .insert(categories)
       .values(insertCategory)
-      .returning();
-    return category;
+      .returning() as unknown as Category[];
+    return result[0];
   }
 
   async updateCategory(
@@ -244,7 +244,7 @@ export class DatabaseStorage implements IStorage {
     limit?: number;
     offset?: number;
   }): Promise<ProductWithCategory[]> {
-    let query = db
+    const baseQuery = db
       .select({
         product: products,
         category: categories,
@@ -291,49 +291,41 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+    const withWhere = conditions.length > 0
+      ? baseQuery.where(and(...conditions))
+      : baseQuery;
 
-    query = query.groupBy(products.id, categories.id);
+    const withGroup = withWhere.groupBy(products.id, categories.id);
 
-    // Sorting
     const order = filters?.sortOrder === "desc" ? desc : asc;
+    let withOrder;
     switch (filters?.sortBy) {
       case "price":
-        query = query.orderBy(order(products.price));
+        withOrder = withGroup.orderBy(order(products.price));
         break;
       case "name":
-        query = query.orderBy(order(products.name));
+        withOrder = withGroup.orderBy(order(products.name));
         break;
       case "rating":
-        query = query.orderBy(order(sql`${avg(reviews.rating)}`));
+        withOrder = withGroup.orderBy(order(sql`${avg(reviews.rating)}`));
         break;
       case "newest":
-        query = query.orderBy(desc(products.createdAt));
+        withOrder = withGroup.orderBy(desc(products.createdAt));
         break;
       default:
-        query = query.orderBy(
-          desc(products.featured),
-          desc(products.createdAt),
-        );
+        withOrder = withGroup.orderBy(desc(products.featured), desc(products.createdAt));
     }
 
-    // Pagination
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
-    }
-    if (filters?.offset) {
-      query = query.offset(filters.offset);
-    }
+    const withLimit = filters?.limit ? withOrder.limit(filters.limit) : withOrder;
+    const withOffset = filters?.offset ? withLimit.offset(filters.offset) : withLimit;
 
-    const results = await query;
+    const results = await withOffset;
 
     return results.map((r) => ({
       ...r.product,
       categoryData: r.category || undefined,
       averageRating: r.averageRating ? parseFloat(r.averageRating) : 0,
-      reviewCount: r.reviewCount ? parseInt(r.reviewCount) : 0,
+      reviewCount: r.reviewCount ? Number(r.reviewCount) : 0,
     }));
   }
 
@@ -360,7 +352,7 @@ export class DatabaseStorage implements IStorage {
       averageRating: result.averageRating
         ? parseFloat(result.averageRating)
         : 0,
-      reviewCount: result.reviewCount ? parseInt(result.reviewCount) : 0,
+      reviewCount: result.reviewCount ? Number(result.reviewCount) : 0,
     };
   }
 
@@ -389,14 +381,19 @@ export class DatabaseStorage implements IStorage {
       averageRating: result.averageRating
         ? parseFloat(result.averageRating)
         : 0,
-      reviewCount: result.reviewCount ? parseInt(result.reviewCount) : 0,
+      reviewCount: result.reviewCount ? Number(result.reviewCount) : 0,
     };
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const slug = (insertProduct as any).slug ||
+      (insertProduct.name as string)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
     const [product] = await db
       .insert(products)
-      .values(insertProduct)
+      .values({ ...insertProduct, slug } as any)
       .returning();
     return product;
   }
@@ -474,7 +471,7 @@ export class DatabaseStorage implements IStorage {
       ...cartRecord,
       items: items.map((item) => ({
         ...item.cartItem,
-        product: item.product,
+        product: item.product!,
       })),
       subtotal,
       totalItems,
@@ -577,7 +574,7 @@ export class DatabaseStorage implements IStorage {
   async getWishlist(
     userId: number,
   ): Promise<(Wishlist & { product: Product })[]> {
-    return await db
+    const results = await db
       .select({
         wishlist: wishlist,
         product: products,
@@ -585,6 +582,10 @@ export class DatabaseStorage implements IStorage {
       .from(wishlist)
       .leftJoin(products, eq(wishlist.productId, products.id))
       .where(eq(wishlist.userId, userId));
+
+    return results
+      .filter((r) => r.product !== null)
+      .map((r) => ({ ...r.wishlist, product: r.product! }));
   }
 
   async addToWishlist(userId: number, productId: number): Promise<Wishlist> {

@@ -94,7 +94,7 @@ export default function CartPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Cart Items */}
               <div className="lg:col-span-2 space-y-4">
-                {cart.items.map((item, index) => (
+                {cart.items.map((item: any, index: number) => (
                   <motion.div
                     key={item.id}
                     initial={{ opacity: 0, x: -20 }}

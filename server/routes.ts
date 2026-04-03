@@ -51,8 +51,7 @@ async function seedDatabase() {
       username: "admin",
       email: process.env.ADMIN_EMAIL || "admin@gemessence.co.ke",
       password: adminPassword,
-      isAdmin: true,
-    });
+    } as any);
     console.log("Admin user created");
   }
 
@@ -93,7 +92,7 @@ async function seedDatabase() {
     ];
 
     for (const cat of categories) {
-      await storage.createCategory(cat);
+      await storage.createCategory(cat as any);
     }
   }
 
@@ -439,7 +438,8 @@ export async function registerRoutes(
         chainLength: input.chainLength || null,
         engraving: input.engraving || null,
         giftWrap: input.giftWrap,
-      });
+        productId: input.productId,
+      } as any);
 
       // Return updated cart
       const updatedCart = await storage.getCart(undefined, sessionId);
@@ -651,7 +651,7 @@ export async function registerRoutes(
           metalColor: item.metalColor,
           chainLength: item.chainLength,
           engraving: item.engraving,
-          giftWrap: item.giftWrap,
+          giftWrap: item.giftWrap ?? false,
         })),
         subtotal,
         shippingCost,

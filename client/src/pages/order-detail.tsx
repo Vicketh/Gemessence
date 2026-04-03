@@ -164,7 +164,7 @@ export default function OrderDetailPage() {
                   <CardContent className="p-6">
                     <h2 className="font-display text-xl font-bold mb-4">Order Items</h2>
                     <div className="space-y-4">
-                      {order.items.map((item) => (
+                      {order.items.map((item: any) => (
                         <div key={item.id} className="flex gap-4 border-b border-border last:border-0 pb-4 last:pb-0">
                           <div className="w-24 h-24 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
                             {item.productImageUrl && (

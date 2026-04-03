@@ -91,7 +91,7 @@ export default function OrdersPage() {
               </div>
             ) : orders && orders.length > 0 ? (
               <div className="space-y-4">
-                {orders.map((order, index) => (
+                {orders.map((order: any, index: number) => (
                   <motion.div
                     key={order.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -138,7 +138,7 @@ export default function OrdersPage() {
                             <span>{order.items.length} {order.items.length === 1 ? "item" : "items"}</span>
                           </div>
                           <div className="flex gap-3 overflow-x-auto">
-                            {order.items.slice(0, 4).map((item) => (
+                            {order.items.slice(0, 4).map((item: any) => (
                               <div key={item.id} className="flex-shrink-0 w-20 h-20 rounded bg-muted">
                                 {item.productImageUrl && (
                                   <img
