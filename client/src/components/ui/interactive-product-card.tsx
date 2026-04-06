@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Heart, Eye, ShoppingCart, Star, Check } from "lucide-react";
+import { Heart, ShoppingCart, Star, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/hooks/use-currency";
@@ -74,18 +75,20 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
       className="group relative bg-card rounded-2xl overflow-hidden shadow-lg cursor-pointer border border-border/50 hover:border-primary/40 transition-colors duration-300"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(201,162,39,0.15)" }}
-      transition={{ duration: 0.3 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
       onClick={() => onClick?.(product)}
+      role="link"
     >
+      <Link href={`/product/${product.slug}`}>
       {/* Image */}
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
         <motion.img
           src={product.imageUrl}
           alt={product.name}
           className="w-full h-full object-cover"
-          animate={{ scale: isHovered ? 1.08 : 1 }}
-          transition={{ duration: 0.6 }}
+          animate={{ scale: isHovered ? 1.05 : 1 }}
+          transition={{ duration: 0.4 }}
           loading="lazy"
         />
 
@@ -108,7 +111,7 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
           )}
           {product.featured && (
             <Badge className="bg-black/70 text-white text-xs border border-primary/50">
-              ✦ Featured
+              Featured
             </Badge>
           )}
         </div>
@@ -123,25 +126,11 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
           <Heart className={`h-4 w-4 transition-colors ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600 dark:text-gray-300"}`} />
         </motion.button>
 
-        {/* Quick view button */}
-        <motion.div
-          className="absolute top-14 right-3"
-          animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 10 }}
-          transition={{ duration: 0.2 }}
-        >
-          <button
-            className="h-9 w-9 rounded-full bg-white/90 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-            onClick={(e) => { e.stopPropagation(); onClick?.(product); }}
-          >
-            <Eye className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-          </button>
-        </motion.div>
-
         {/* Quick Add button */}
         <motion.div
           className="absolute bottom-4 left-4 right-4"
-          animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 16 }}
-          transition={{ duration: 0.25, delay: 0.05 }}
+          animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 12 }}
+          transition={{ duration: 0.2 }}
         >
           <Button
             className={`w-full rounded-full font-semibold shadow-lg transition-all ${
@@ -197,25 +186,9 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
               </span>
             )}
           </div>
-          <motion.button
-            className={`h-9 w-9 rounded-full flex items-center justify-center shadow-md transition-colors ${
-              inCart ? "bg-green-600 text-white" : "bg-primary text-primary-foreground hover:bg-primary/90"
-            }`}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleAddToCart}
-          >
-            {inCart ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
-          </motion.button>
         </div>
       </div>
-
-      {/* Shine sweep */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -skew-x-12 pointer-events-none"
-        animate={{ x: isHovered ? "200%" : "-100%" }}
-        transition={{ duration: 0.7 }}
-      />
+      </Link>
     </motion.div>
   );
 }

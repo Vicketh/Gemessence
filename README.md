@@ -69,7 +69,10 @@ A premium jewelry e-commerce platform built with modern web technologies, featur
    ```env
    DATABASE_URL=postgresql://user:password@localhost:5432/gemessence
    ADMIN_PASSWORD=your_secure_admin_password
+   SUPERUSER_PASSWORD=your_secure_superuser_password
    ADMIN_EMAIL=admin@gemessence.co.ke
+   RESEND_API_KEY=your-resend-api-key
+   EMAIL_FROM=noreply@gemessence.co.ke
    PORT=5000
    NODE_ENV=development
    ```
@@ -87,6 +90,70 @@ A premium jewelry e-commerce platform built with modern web technologies, featur
 6. **Access the Application**
    - Frontend: http://localhost:5000
    - Admin Dashboard: http://localhost:5000/admin
+
+## 🚀 Deployment
+
+This project uses a **split architecture** for production:
+
+### Architecture Overview
+```
+┌─────────────────────┐     API calls     ┌──────────────────────┐
+│  GitHub Pages       │ ────────────────► │  Render (Free Tier)   │
+│  (React SPA)        │                   │  (Express Backend)    │
+│                     │                   │         │              │
+│  Static hosting     │                   │         ▼              │
+│  - index.html       │                   │  Neon / Supabase      │
+│  - CSS/JS bundles   │                   │  (PostgreSQL)         │
+│  - Assets           │                   └──────────────────────┘
+└─────────────────────┘
+```
+
+### Frontend → GitHub Pages (Automatic)
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that:
+1. Builds the React frontend on every push to `main`
+2. Creates `.nojekyll` and `404.html` for SPA routing
+3. Deploys to GitHub Pages automatically
+
+**Required GitHub Secrets** (Settings → Secrets → Actions):
+
+| Secret | Value |
+|--------|-------|
+| `VITE_API_BASE_URL` | Your Render backend URL (e.g. `https://gemessence-api.onrender.com`) |
+| `VITE_SUPABASE_URL` | (Optional) Your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | (Optional) Your Supabase anon key |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Your Cloudinary cloud name |
+| `VITE_CLOUDINARY_UPLOAD_PRESET` | Your unsigned upload preset |
+
+### Backend → Render (Free Tier)
+1. Create a free account at [render.com](https://render.com)
+2. Create a new **Web Service** from your GitHub repo
+3. Configure:
+   - **Build Command**: `npm ci && npm run build`
+   - **Start Command**: `node dist/index.cjs`
+   - **Plan**: Free
+
+**Required Environment Variables** on Render:
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | Neon/Supabase PostgreSQL connection string |
+| `ADMIN_PASSWORD` | Admin account password |
+| `SUPERUSER_PASSWORD` | Superuser account password |
+| `ADMIN_EMAIL` | Admin email address |
+| `RESEND_API_KEY` | Email service API key (from resend.com) |
+| `EMAIL_FROM` | Sender email (e.g. `noreply@gemessence.co.ke`) |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `VITE_CLOUDINARY_UPLOAD_PRESET` | Cloudinary unsigned preset |
+| `PORT` | `10000` (Render default) |
+
+### Database → Neon (Free Tier)
+1. Create a free account at [neon.tech](https://neon.tech)
+2. Create a new PostgreSQL database
+3. Copy the connection string and set it as `DATABASE_URL` on Render
+4. Run `npm run db:push` locally (with your Neon `DATABASE_URL`) to create tables, or let the app seed on first start
+
+### Alternative: All-in-One with Supabase
+If you prefer to eliminate the backend server entirely, migrate to Supabase (see `supabase-schema.sql` for the schema). The frontend can connect directly to Supabase's REST API.
 
 ## 📁 Project Structure
 

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,9 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, CreditCard, Smartphone, Building, CheckCircle, Truck } from "lucide-react";
+import { ArrowLeft, CreditCard, Smartphone, Building, CheckCircle, Truck, Tag, Loader2, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CheckoutPage() {
@@ -40,6 +40,12 @@ export default function CheckoutPage() {
     saveAddress: false,
   });
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponValidating, setCouponValidating] = useState(false);
+  const [couponApplied, setCouponApplied] = useState<{ code: string; discount: number } | null>(null);
+  const [couponMessage, setCouponMessage] = useState("");
+
   const { data: shippingData } = useShippingCost(formData.shippingCounty);
 
   const formatPrice = (price: number | string) => {
@@ -52,7 +58,40 @@ export default function CheckoutPage() {
   const subtotal = cart?.subtotal || 0;
   const shippingCost = shippingData?.cost || 500;
   const tax = subtotal * 0.16;
-  const total = subtotal + shippingCost + tax;
+  const discount = couponApplied?.discount || 0;
+  const total = subtotal + shippingCost + tax - discount;
+
+  const handleCouponValidate = async () => {
+    if (!couponCode.trim()) return;
+    setCouponValidating(true);
+    setCouponMessage("");
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || ""}/api/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), subtotal }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponApplied({ code: couponCode.trim(), discount: data.discount });
+        setCouponMessage("");
+        toast({ title: "Coupon Applied!", description: `You saved ${formatPrice(data.discount)}` });
+      } else {
+        setCouponMessage(data.message || "Invalid coupon");
+        setCouponApplied(null);
+      }
+    } catch {
+      setCouponMessage("Failed to validate coupon");
+    } finally {
+      setCouponValidating(false);
+    }
+  };
+
+  const handleCouponRemove = () => {
+    setCouponApplied(null);
+    setCouponCode("");
+    setCouponMessage("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +130,7 @@ export default function CheckoutPage() {
       const order = await createOrder({
         checkoutData: formData,
         sessionId,
+        userId: user?.id,
       });
 
       if (order) {
@@ -384,6 +424,48 @@ export default function CheckoutPage() {
                         ))}
                       </div>
 
+                      {/* Coupon Code */}
+                      <div className="space-y-2">
+                        {couponApplied ? (
+                          <div className="flex items-center justify-between p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Tag className="h-4 w-4 text-green-500" />
+                              <span className="text-sm font-mono font-semibold">{couponApplied.code}</span>
+                              <span className="text-sm text-green-500">-{formatPrice(couponApplied.discount)}</span>
+                            </div>
+                            <button type="button" onClick={handleCouponRemove} className="text-muted-foreground hover:text-destructive">
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <div className="flex-1 relative">
+                              <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                value={couponCode}
+                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                onKeyDown={(e) => e.key === "Enter" && handleCouponValidate()}
+                                placeholder="Coupon code"
+                                className="pl-9"
+                                disabled={couponValidating}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={handleCouponValidate}
+                              disabled={couponValidating || !couponCode.trim()}
+                            >
+                              {couponValidating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                            </Button>
+                          </div>
+                        )}
+                        {couponMessage && !couponApplied && (
+                          <p className="text-xs text-destructive">{couponMessage}</p>
+                        )}
+                      </div>
+
                       <div className="border-t border-border pt-4 space-y-2">
                         <div className="flex justify-between text-muted-foreground">
                           <span>Subtotal</span>
@@ -397,6 +479,12 @@ export default function CheckoutPage() {
                           <span>Tax (16% VAT)</span>
                           <span>{formatPrice(tax)}</span>
                         </div>
+                        {discount > 0 && (
+                          <div className="flex justify-between text-green-500 font-medium">
+                            <span>Discount</span>
+                            <span>-{formatPrice(discount)}</span>
+                          </div>
+                        )}
                         <div className="border-t border-border pt-3 flex justify-between font-bold text-lg">
                           <span>Total</span>
                           <span className="text-primary">{formatPrice(total)}</span>

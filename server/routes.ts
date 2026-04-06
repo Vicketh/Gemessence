@@ -4,6 +4,11 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import rateLimit from "express-rate-limit";
+import { sendOrderConfirmation } from "./email";
+import { uploadImage } from "./cloudinary";
+import multer from "multer";
 import {
   KENYAN_COUNTIES,
   METAL_TYPES,
@@ -30,12 +35,71 @@ function csrfProtection(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Stricter rate limiter for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per window
+  message: { message: "Too many authentication attempts, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Admin authorization middleware
+async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  try {
+    const cookies = parseCookies(req.headers.cookie);
+    const userId = cookies.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const user = await storage.getUser(parseInt(userId));
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    (req as any).adminUser = user;
+    next();
+  } catch {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+}
+
+// Superuser authorization middleware
+async function requireSuperUser(req: Request, res: Response, next: NextFunction) {
+  try {
+    const cookies = parseCookies(req.headers.cookie);
+    const userId = cookies.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const user = await storage.getUser(parseInt(userId));
+    if (!user || !(user as any).isSuperUser) {
+      return res.status(403).json({ message: "Superuser access required" });
+    }
+    (req as any).adminUser = user;
+    next();
+  } catch {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+}
+
 // Generate slug from name
 function generateSlug(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+// Helper function to parse cookies
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+  cookieHeader.split(';').forEach(cookie => {
+    const [name, ...rest] = cookie.trim().split('=');
+    const value = rest.join('=');
+    cookies[name] = decodeURIComponent(value);
+  });
+  return cookies;
 }
 
 // Seed function for categories and products
@@ -47,10 +111,11 @@ async function seedDatabase() {
     if (!adminPassword) {
       throw new Error("ADMIN_PASSWORD environment variable must be set");
     }
+    const hashedPassword = await bcrypt.hash(adminPassword, 12);
     await storage.createUser({
       username: "admin",
       email: process.env.ADMIN_EMAIL || "admin@gemessence.co.ke",
-      password: adminPassword,
+      password: hashedPassword,
     } as any);
     console.log("Admin user created");
   }
@@ -58,15 +123,20 @@ async function seedDatabase() {
   // Create superuser
   const existingSuperUser = await storage.getUserByUsername("superuser");
   if (!existingSuperUser) {
+    const superPassword = process.env.SUPERUSER_PASSWORD;
+    if (!superPassword) {
+      throw new Error("SUPERUSER_PASSWORD environment variable must be set");
+    }
+    const hashedSuperPassword = await bcrypt.hash(superPassword, 12);
     await storage.createUser({
       username: "superuser",
       email: "superuser@gemessence.co.ke",
-      password: "GemSuper@2025!",
+      password: hashedSuperPassword,
     } as any);
     // Set superuser flags directly
     const su = await storage.getUserByUsername("superuser");
     if (su) await storage.updateUser(su.id, { isAdmin: true, isSuperUser: true } as any);
-    console.log("Superuser created — username: superuser, password: GemSuper@2025!");
+    console.log("Superuser created — username: superuser, password: [set via SUPERUSER_PASSWORD env var]");
   }
 
   // Seed categories first
@@ -253,7 +323,7 @@ export async function registerRoutes(
   });
 
   // ==================== AUTH ROUTES ====================
-  app.post(api.auth.register.path, async (req, res) => {
+  app.post(api.auth.register.path, authLimiter, async (req, res) => {
     try {
       const input = api.auth.register.input.parse(req.body);
       const existingUser = await storage.getUserByUsername(input.username);
@@ -265,7 +335,8 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Email already exists" });
       }
 
-      const user = await storage.createUser(input);
+      const hashedPassword = await bcrypt.hash(input.password, 12);
+      const user = await storage.createUser({ ...input, password: hashedPassword } as any);
       res.status(201).json({
         id: user.id,
         username: user.username,
@@ -287,7 +358,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.auth.login.path, async (req, res) => {
+  app.post(api.auth.login.path, authLimiter, async (req, res) => {
     try {
       const input = api.auth.login.input.parse(req.body);
       // Try to find user by username first (for admin), then by email
@@ -296,11 +367,19 @@ export async function registerRoutes(
         user = await storage.getUserByEmail(input.username);
       }
 
-      if (!user || user.password !== input.password) {
+      if (!user || !(await bcrypt.compare(input.password, user.password))) {
         return res
           .status(401)
           .json({ message: "Invalid username/email or password" });
       }
+
+      // Set a simple cookie with user ID (in production, use proper JWT or session)
+      res.cookie('userId', user.id.toString(), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      });
 
       res.status(200).json({
         id: user.id,
@@ -321,12 +400,39 @@ export async function registerRoutes(
   });
 
   app.post(api.auth.logout.path, (req, res) => {
+    res.clearCookie('userId');
     res.status(200).json({ success: true });
   });
 
-  app.get(api.auth.me.path, (req, res) => {
-    // For MVP, return 401 as full session not wired up
-    res.status(401).json({ message: "Not authenticated" });
+  app.get(api.auth.me.path, async (req, res) => {
+    try {
+      const cookies = parseCookies(req.headers.cookie);
+      const userId = cookies.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(parseInt(userId));
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      res.status(200).json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        isVerified: user.isVerified,
+        isAdmin: user.isAdmin,
+        isSuperUser: (user as any).isSuperUser ?? false,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
+        county: user.county,
+        createdAt: user.createdAt,
+      });
+    } catch (err) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
   });
 
   // ==================== PRODUCT ROUTES ====================
@@ -433,7 +539,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.cart.addItem.path, async (req, res) => {
+  app.post(api.cart.addItem.path, csrfProtection, async (req, res) => {
     try {
       const input = api.cart.addItem.input.parse(req.body);
       const sessionId =
@@ -468,7 +574,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put(api.cart.updateItem.path, async (req, res) => {
+  app.put(api.cart.updateItem.path, csrfProtection, async (req, res) => {
     try {
       const cartItemId = Number(req.params.id);
       const data = req.body;
@@ -497,7 +603,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.cart.removeItem.path, async (req, res) => {
+  app.delete(api.cart.removeItem.path, csrfProtection, async (req, res) => {
     try {
       const cartItemId = Number(req.params.id);
       await storage.removeCartItem(cartItemId);
@@ -507,7 +613,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.cart.clear.path, async (req, res) => {
+  app.delete(api.cart.clear.path, csrfProtection, async (req, res) => {
     try {
       const sessionId = req.query.sessionId as string;
       const cartData = await storage.getCart(undefined, sessionId);
@@ -539,7 +645,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.wishlist.addItem.path, async (req, res) => {
+  app.post(api.wishlist.addItem.path, csrfProtection, async (req, res) => {
     const userId = req.query.userId ? Number(req.query.userId) : undefined;
 
     if (!userId) {
@@ -558,7 +664,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.wishlist.removeItem.path, async (req, res) => {
+  app.delete(api.wishlist.removeItem.path, csrfProtection, async (req, res) => {
     const userId = req.query.userId ? Number(req.query.userId) : undefined;
 
     if (!userId) {
@@ -630,12 +736,9 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.orders.create.path, async (req, res) => {
-    const userId = req.query.userId ? Number(req.query.userId) : undefined;
-
-    if (!userId) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
+  app.post(api.orders.create.path, csrfProtection, async (req, res) => {
+    // Allow guest checkout: userId is optional
+    const userId = req.query.userId ? Number(req.query.userId) : null;
 
     try {
       const input = api.orders.create.input.parse(req.body);
@@ -705,6 +808,24 @@ export async function registerRoutes(
       }
 
       const fullOrder = await storage.getOrder(order.id);
+      if (!fullOrder) {
+        return res.status(500).json({ message: "Failed to retrieve created order" });
+      }
+
+      // Send order confirmation email (non-blocking)
+      sendOrderConfirmation({
+        to: input.shippingEmail,
+        orderNumber: fullOrder.orderNumber,
+        customerName: `${input.shippingFirstName} ${input.shippingLastName}`,
+        total: fullOrder.total,
+        currency: fullOrder.currency || "KES",
+        items: fullOrder.items.map((item) => ({
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+      }).catch((err) => console.error("Email notification failed:", err));
+
       res.status(201).json(fullOrder);
     } catch (err) {
       console.error("Order creation error:", err);
@@ -726,7 +847,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.reviews.create.path, async (req, res) => {
+  app.post(api.reviews.create.path, csrfProtection, async (req, res) => {
     const userId = req.query.userId ? Number(req.query.userId) : undefined;
 
     if (!userId) {
@@ -997,9 +1118,165 @@ export async function registerRoutes(
     } catch { res.status(500).json({ message: "Failed to fetch role permissions" }); }
   });
 
-  // ==================== SUPERUSER ROUTES ====================
+  // ==================== ADMIN ROUTES ====================
+
+  // Image upload (admin)
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  });
+
+  app.post("/api/admin/upload", requireAdmin, upload.single("image"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const folder = req.query.folder as string || "products";
+      const result = await uploadImage(req.file.buffer, folder);
+      res.json({ url: result.url, publicId: result.publicId });
+    } catch (err) {
+      console.error("Upload error:", err);
+      res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
+
+  // Get app settings (admin)
+  app.get(api.admin.settings.get.path, requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getSettings();
+      res.json(settings);
+    } catch { res.status(500).json({ message: "Failed to fetch settings" }); }
+  });
+
+  // Update app settings (admin)
+  app.put(api.admin.settings.update.path, requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const settings = await storage.updateSettings(req.body);
+      res.json(settings);
+    } catch { res.status(500).json({ message: "Failed to update settings" }); }
+  });
+
+  // List admins (superuser)
+  app.get(api.admin.admins.list.path, requireSuperUser, async (req, res) => {
+    try {
+      const admins = await storage.getAdmins();
+      res.json(admins);
+    } catch { res.status(500).json({ message: "Failed to fetch admins" }); }
+  });
+
+  // ==================== COUPON ROUTES ====================
+
+  // Validate coupon (public)
+  app.post(api.coupons.validate.path, async (req, res) => {
+    try {
+      const input = api.coupons.validate.input.parse(req.body);
+      const result = await storage.validateCoupon(input.code, input.subtotal);
+      res.json(result);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Failed to validate coupon" });
+    }
+  });
+
+  // List coupons (admin)
+  app.get(api.admin.coupons.list.path, requireAdmin, async (req, res) => {
+    try {
+      const coupons = await storage.getCoupons();
+      res.json(coupons);
+    } catch { res.status(500).json({ message: "Failed to fetch coupons" }); }
+  });
+
+  // Create coupon (admin)
+  app.post(api.admin.coupons.create.path, requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      const coupon = await storage.createCoupon(req.body);
+      res.status(201).json({ success: true, id: coupon.id });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Failed to create coupon" });
+    }
+  });
+
+  // Update coupon (admin)
+  app.put("/api/admin/coupons/:id", requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      await storage.updateCoupon(Number(req.params.id), req.body);
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to update coupon" }); }
+  });
+
+  // Delete coupon (admin)
+  app.delete("/api/admin/coupons/:id", requireAdmin, csrfProtection, async (req, res) => {
+    try {
+      await storage.deleteCoupon(Number(req.params.id));
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to delete coupon" }); }
+  });
+
+  // ==================== ADDRESS ROUTES ====================
+
+  // Get saved addresses
+  app.get("/api/addresses", async (req, res) => {
+    const userId = req.query.userId ? Number(req.query.userId) : undefined;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    try {
+      const addresses = await storage.getAddresses(userId);
+      res.json(addresses);
+    } catch { res.status(500).json({ message: "Failed to fetch addresses" }); }
+  });
+
+  // Create saved address
+  app.post("/api/addresses", csrfProtection, async (req, res) => {
+    const userId = req.query.userId ? Number(req.query.userId) : undefined;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    try {
+      const address = await storage.createAddress({ ...req.body, userId });
+      res.status(201).json(address);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      res.status(500).json({ message: "Failed to save address" });
+    }
+  });
+
+  // Update address
+  app.put("/api/addresses/:id", csrfProtection, async (req, res) => {
+    const userId = req.query.userId ? Number(req.query.userId) : undefined;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    try {
+      await storage.updateAddress(Number(req.params.id), req.body);
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to update address" }); }
+  });
+
+  // Delete address
+  app.delete("/api/addresses/:id", csrfProtection, async (req, res) => {
+    const userId = req.query.userId ? Number(req.query.userId) : undefined;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    try {
+      await storage.deleteAddress(Number(req.params.id), userId);
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to delete address" }); }
+  });
+
+  // Set default address
+  app.put("/api/addresses/:id/default", csrfProtection, async (req, res) => {
+    const userId = req.query.userId ? Number(req.query.userId) : undefined;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    try {
+      await storage.setDefaultAddress(Number(req.params.id), userId);
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to set default address" }); }
+  });
+
+  // ==================== LEGACY SUPERUSER ROUTES (kept for backward compatibility) ====================
+
   // Get all admins
-  app.get("/api/superuser/admins", async (req, res) => {
+  app.get("/api/superuser/admins", requireSuperUser, async (req, res) => {
     try {
       const admins = await storage.getAdmins();
       res.json(admins);
@@ -1007,7 +1284,7 @@ export async function registerRoutes(
   });
 
   // Promote user to admin
-  app.post("/api/superuser/admins/:userId", async (req, res) => {
+  app.post("/api/superuser/admins/:userId", requireSuperUser, csrfProtection, async (req, res) => {
     try {
       const user = await storage.updateUser(Number(req.params.userId), { isAdmin: true } as any);
       res.json(user);
@@ -1015,23 +1292,22 @@ export async function registerRoutes(
   });
 
   // Demote admin
-  app.delete("/api/superuser/admins/:userId", async (req, res) => {
+  app.delete("/api/superuser/admins/:userId", requireSuperUser, csrfProtection, async (req, res) => {
     try {
       const user = await storage.updateUser(Number(req.params.userId), { isAdmin: false } as any);
       res.json(user);
     } catch { res.status(500).json({ message: "Failed to demote admin" }); }
   });
 
-  // Get app settings
-  app.get("/api/superuser/settings", async (req, res) => {
+  // Legacy settings endpoints (redirect to admin routes)
+  app.get("/api/superuser/settings", requireAdmin, async (req, res) => {
     try {
       const settings = await storage.getSettings();
       res.json(settings);
     } catch { res.status(500).json({ message: "Failed to fetch settings" }); }
   });
 
-  // Update app settings
-  app.put("/api/superuser/settings", async (req, res) => {
+  app.put("/api/superuser/settings", requireAdmin, csrfProtection, async (req, res) => {
     try {
       const settings = await storage.updateSettings(req.body);
       res.json(settings);

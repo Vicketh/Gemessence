@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
 import { CurrencyProvider } from "@/hooks/use-currency";
 import { CartProvider } from "@/hooks/use-cart-context";
+import { PageTransition } from "@/components/layout/page-transition";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import AuthPage from "@/pages/auth-page";
@@ -16,6 +17,7 @@ import CheckoutPage from "@/pages/checkout";
 import OrdersPage from "@/pages/orders";
 import OrderDetailPage from "@/pages/order-detail";
 import WishlistPage from "@/pages/wishlist";
+import ProductDetailPage from "@/pages/product-detail";
 import AdminDashboardNew from "@/pages/admin/admin-dashboard-new";
 import AdminProducts from "@/pages/admin/products";
 import AdminOrders from "@/pages/admin/orders";
@@ -32,6 +34,7 @@ function Router() {
       <Route path="/orders" component={OrdersPage} />
       <Route path="/orders/:id" component={OrderDetailPage} />
       <Route path="/wishlist" component={WishlistPage} />
+      <Route path="/product/:slug" component={ProductDetailPage} />
       {/* Admin Routes */}
       <Route path="/admin" component={AdminDashboardNew} />
       <Route path="/admin/products" component={AdminProducts} />
@@ -51,7 +54,9 @@ function App() {
             <AuthProvider>
               <TooltipProvider>
                 <Toaster />
-                <Router />
+                <PageTransition>
+                  <Router />
+                </PageTransition>
               </TooltipProvider>
             </AuthProvider>
           </QueryClientProvider>

@@ -41,9 +41,11 @@ export function useOrders(userId?: number) {
   });
 
   const createOrderMutation = useMutation({
-    mutationFn: async ({ checkoutData, sessionId }: { checkoutData: CheckoutData; sessionId: string }) => {
-      const userId = 1; // For MVP - replace with actual user ID from auth
-      const res = await fetch(`${api.orders.create.path}?userId=${userId}&sessionId=${sessionId}`, {
+    mutationFn: async ({ checkoutData, sessionId, userId }: { checkoutData: CheckoutData; sessionId: string; userId?: number }) => {
+      const params = new URLSearchParams();
+      params.set("sessionId", sessionId);
+      if (userId) params.set("userId", String(userId));
+      const res = await fetch(`${api.orders.create.path}?${params.toString()}`, {
         method: api.orders.create.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(checkoutData),

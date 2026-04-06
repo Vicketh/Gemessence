@@ -33,19 +33,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: node_modules/.bin/vite build
+      - name: Build (full build: client + server)
+        run: npm run build
         env:
           NODE_ENV: production
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_CLOUDINARY_CLOUD_NAME: ${{ secrets.VITE_CLOUDINARY_CLOUD_NAME }}
           VITE_CLOUDINARY_UPLOAD_PRESET: ${{ secrets.VITE_CLOUDINARY_UPLOAD_PRESET }}
-
-      - name: Copy 404 fallback and add .nojekyll
-        run: |
-          cp dist/public/index.html dist/public/404.html
-          touch dist/public/.nojekyll
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

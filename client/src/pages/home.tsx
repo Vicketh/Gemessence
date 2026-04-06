@@ -286,26 +286,20 @@ export default function Home() {
             ].map((prop, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.2, duration: 0.6 }}
-                whileHover={{ y: -10, scale: 1.02 }}
+                transition={{ delay: i * 0.15, duration: 0.5 }}
                 className="group relative"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${prop.color} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 <div className="relative flex flex-col items-center text-center p-8 glass-panel rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300">
-                  <motion.div 
-                    className="w-20 h-20 rounded-full bg-dual-accent flex items-center justify-center text-white mb-6 shadow-lg"
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <prop.icon className="w-10 h-10" />
-                  </motion.div>
-                  <h3 className="font-display text-xl font-bold mb-3 text-dual-accent group-hover:text-primary transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-dual-accent flex items-center justify-center text-white mb-5 shadow-lg">
+                    <prop.icon className="w-8 h-8" />
+                  </div>
+                  <h3 className="font-display text-xl font-bold mb-2 text-dual-accent group-hover:text-primary transition-colors">
                     {prop.title}
                   </h3>
-                  <p className="text-muted-foreground group-hover:text-foreground transition-colors">
+                  <p className="text-muted-foreground text-sm">
                     {prop.desc}
                   </p>
                 </div>
@@ -383,24 +377,24 @@ export default function Home() {
               </h4>
               <ul className="space-y-4 text-white/70">
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <Link href="/#collections" className="hover:text-primary transition-colors cursor-pointer">
                     New Arrivals
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <Link href="/#collections" className="hover:text-primary transition-colors cursor-pointer">
                     Bestsellers
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <Link href="/#collections" className="hover:text-primary transition-colors cursor-pointer">
                     Bridal Collection
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <Link href="/#collections" className="hover:text-primary transition-colors cursor-pointer">
                     High Jewelry
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -410,39 +404,44 @@ export default function Home() {
               </h4>
               <ul className="space-y-4 text-white/70">
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <a
+                    href={`https://wa.me/${encodeURIComponent("+254797534189")}?text=${encodeURIComponent("Hello! I need assistance.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
                     Contact Us
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <span className="hover:text-primary transition-colors cursor-pointer">
                     Shipping & Returns
-                  </a>
+                  </span>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <span className="hover:text-primary transition-colors cursor-pointer">
                     Care Guide
-                  </a>
+                  </span>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <span className="hover:text-primary transition-colors cursor-pointer">
                     FAQ
-                  </a>
+                  </span>
                 </li>
               </ul>
             </div>
           </div>
           <div className="pt-8 border-t border-white/20 text-center text-sm text-white/60 flex flex-col md:flex-row justify-between items-center gap-4">
             <p>
-              &copy; {new Date().getFullYear()} GemEssence. All rights reserved.
+              &copy; {new Date().getFullYear()} Gemessence. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition-colors">
+              <span className="hover:text-white transition-colors cursor-pointer">
                 Privacy Policy
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
+              </span>
+              <span className="hover:text-white transition-colors cursor-pointer">
                 Terms of Service
-              </a>
+              </span>
             </div>
           </div>
         </div>

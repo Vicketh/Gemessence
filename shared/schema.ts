@@ -152,7 +152,6 @@ export const wishlist = pgTable("wishlist", {
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
-    .notNull()
     .references(() => users.id),
   orderNumber: text("order_number").notNull().unique(),
   status: text("status").notNull().default("pending"), // pending, processing, shipped, delivered, cancelled, refunded
@@ -227,6 +226,48 @@ export const appSettings = pgTable("app_settings", {
   id: serial("id").primaryKey(),
   key: text("key").notNull().unique(),
   value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================
+// SAVED ADDRESSES TABLE
+// ============================================
+export const savedAddresses = pgTable("saved_addresses", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  label: text("label").notNull(), // "Home", "Office", "Nairobi Office"
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  county: text("county").notNull(),
+  postalCode: text("postal_code"),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================
+// COUPONS TABLE
+// ============================================
+export const coupons = pgTable("coupons", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // e.g. "SAVE20", "WELCOME10"
+  description: text("description"),
+  discountType: text("discount_type").notNull(), // "percentage" or "fixed"
+  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minOrderAmount: numeric("min_order_amount", { precision: 10, scale: 2 }).default("0"),
+  maxDiscountAmount: numeric("max_discount_amount", { precision: 10, scale: 2 }), // cap for percentage discounts
+  usageLimit: integer("usage_limit"), // null = unlimited
+  usageCount: integer("usage_count").default(0),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  isActive: boolean("is_active").default(true),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
@@ -370,6 +411,23 @@ export const insertProductDiscountSchema = createInsertSchema(productDiscounts).
   updatedAt: true,
 });
 
+export const insertCouponSchema = createInsertSchema(coupons).omit({
+  id: true,
+  usageCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAddressSchema = createInsertSchema(savedAddresses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const selectAddressSchema = createSelectSchema(savedAddresses);
+export type SavedAddress = typeof savedAddresses.$inferSelect;
+export type InsertAddress = z.infer<typeof insertAddressSchema>;
+
 // ============================================
 // SELECT SCHEMAS (for reading records)
 // ============================================
@@ -415,6 +473,9 @@ export type RolePermission = typeof rolePermissions.$inferSelect;
 export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
 export type ProductDiscount = typeof productDiscounts.$inferSelect;
 export type InsertProductDiscount = z.infer<typeof insertProductDiscountSchema>;
+export type Coupon = typeof coupons.$inferSelect;
+export type InsertCoupon = z.infer<typeof insertCouponSchema>;
+export const selectCouponSchema = createSelectSchema(coupons);
 
 // ============================================
 // REQUEST/RESPONSE TYPES

@@ -524,6 +524,135 @@ export const api = {
       },
     },
   },
+  admin: {
+    settings: {
+      get: {
+        method: "GET" as const,
+        path: "/api/admin/settings" as const,
+        responses: {
+          200: z.record(z.string(), z.string()),
+          401: errorSchema,
+          403: errorSchema,
+        },
+      },
+      update: {
+        method: "PUT" as const,
+        path: "/api/admin/settings" as const,
+        input: z.record(z.string(), z.string()),
+        responses: {
+          200: z.record(z.string(), z.string()),
+          401: errorSchema,
+          403: errorSchema,
+        },
+      },
+    },
+    admins: {
+      list: {
+        method: "GET" as const,
+        path: "/api/admin/users" as const,
+        responses: {
+          200: z.array(userResponseSchema),
+          401: errorSchema,
+          403: errorSchema,
+        },
+      },
+    },
+    coupons: {
+      list: {
+        method: "GET" as const,
+        path: "/api/admin/coupons" as const,
+        responses: {
+          200: z.array(
+            z.object({
+              id: z.number(),
+              code: z.string(),
+              description: z.string().nullable(),
+              discountType: z.string(),
+              discountValue: z.string(),
+              minOrderAmount: z.string().nullable(),
+              maxDiscountAmount: z.string().nullable(),
+              usageLimit: z.number().nullable(),
+              usageCount: z.number(),
+              startDate: z.date().nullable(),
+              endDate: z.date().nullable(),
+              isActive: z.boolean(),
+              createdAt: z.date(),
+            }),
+          ),
+          401: errorSchema,
+          403: errorSchema,
+        },
+      },
+      create: {
+        method: "POST" as const,
+        path: "/api/admin/coupons" as const,
+        input: z.object({
+          code: z.string().min(1).max(50),
+          description: z.string().optional(),
+          discountType: z.enum(["percentage", "fixed"]),
+          discountValue: z.number().positive(),
+          minOrderAmount: z.number().min(0).optional(),
+          maxDiscountAmount: z.number().positive().optional(),
+          usageLimit: z.number().positive().optional(),
+          endDate: z.string().optional(),
+          isActive: z.boolean().default(true),
+        }),
+        responses: {
+          201: z.object({ success: z.boolean(), id: z.number() }),
+          400: errorSchema,
+          401: errorSchema,
+          403: errorSchema,
+        },
+      },
+      update: {
+        method: "PUT" as const,
+        path: "/api/admin/coupons/:id" as const,
+        input: z.object({
+          discountType: z.enum(["percentage", "fixed"]).optional(),
+          discountValue: z.number().positive().optional(),
+          minOrderAmount: z.number().min(0).optional(),
+          maxDiscountAmount: z.number().positive().optional(),
+          usageLimit: z.number().positive().nullable().optional(),
+          endDate: z.string().nullable().optional(),
+          isActive: z.boolean().optional(),
+        }),
+        responses: {
+          200: z.object({ success: z.boolean() }),
+          404: errorSchema,
+          401: errorSchema,
+          403: errorSchema,
+        },
+      },
+      delete: {
+        method: "DELETE" as const,
+        path: "/api/admin/coupons/:id" as const,
+        responses: {
+          200: z.object({ success: z.boolean() }),
+          404: errorSchema,
+          401: errorSchema,
+          403: errorSchema,
+        },
+      },
+    },
+  },
+  coupons: {
+    validate: {
+      method: "POST" as const,
+      path: "/api/coupons/validate" as const,
+      input: z.object({
+        code: z.string(),
+        subtotal: z.number(),
+      }),
+      responses: {
+        200: z.object({
+          valid: z.boolean(),
+          discount: z.number(),
+          message: z.string().optional(),
+        }),
+        400: errorSchema,
+      },
+    },
+  },
 };
 
 export function buildUrl(

@@ -15,6 +15,8 @@ import {
   adminPermissions,
   rolePermissions,
   productDiscounts,
+  coupons,
+  savedAddresses,
   type User,
   type InsertUser,
   type Product,
@@ -34,6 +36,8 @@ import {
   type AdminRole,
   type AdminPermission,
   type ProductDiscount,
+  type Coupon,
+  type SavedAddress,
   type ProductWithCategory,
   type CartWithItems,
   type OrderWithItems,
@@ -161,6 +165,22 @@ export interface IStorage {
   getSettings(): Promise<Record<string, string>>;
   updateSettings(data: Record<string, string>): Promise<Record<string, string>>;
   getAdmins(): Promise<User[]>;
+
+  // Coupons
+  getCoupons(): Promise<Coupon[]>;
+  getCouponByCode(code: string): Promise<Coupon | undefined>;
+  createCoupon(coupon: any): Promise<Coupon>;
+  updateCoupon(id: number, data: Partial<Coupon>): Promise<Coupon | undefined>;
+  deleteCoupon(id: number): Promise<void>;
+  validateCoupon(code: string, subtotal: number): Promise<{ valid: boolean; discount: number; message?: string }>;
+  incrementCouponUsage(id: number): Promise<void>;
+
+  // Saved Addresses
+  getAddresses(userId: number): Promise<SavedAddress[]>;
+  createAddress(data: any): Promise<SavedAddress>;
+  updateAddress(id: number, data: Partial<SavedAddress>): Promise<SavedAddress | undefined>;
+  deleteAddress(id: number, userId: number): Promise<void>;
+  setDefaultAddress(id: number, userId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -686,7 +706,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrder(data: {
-    userId: number;
+    userId: number | null;
     items: Array<{
       productId: number;
       quantity: number;
@@ -981,6 +1001,128 @@ export class DatabaseStorage implements IStorage {
   async deleteDiscount(id: number) {
     const { productDiscounts } = await import("@shared/schema");
     await db.delete(productDiscounts).where(eq(productDiscounts.id, id));
+  }
+
+  // ==================== COUPONS ====================
+  async getCoupons(): Promise<Coupon[]> {
+    return await db.select().from(coupons).orderBy(desc(coupons.createdAt));
+  }
+
+  async getCouponByCode(code: string): Promise<Coupon | undefined> {
+    const [coupon] = await db.select().from(coupons).where(eq(coupons.code, code.toUpperCase()));
+    return coupon;
+  }
+
+  async createCoupon(data: any): Promise<Coupon> {
+    const [coupon] = await db.insert(coupons).values({
+      ...data,
+      code: data.code.toUpperCase(),
+    }).returning();
+    return coupon;
+  }
+
+  async updateCoupon(id: number, data: Partial<Coupon>): Promise<Coupon | undefined> {
+    const [coupon] = await db
+      .update(coupons)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(coupons.id, id))
+      .returning();
+    return coupon;
+  }
+
+  async deleteCoupon(id: number): Promise<void> {
+    await db.delete(coupons).where(eq(coupons.id, id));
+  }
+
+  async validateCoupon(code: string, subtotal: number): Promise<{ valid: boolean; discount: number; message?: string }> {
+    const coupon = await this.getCouponByCode(code);
+
+    if (!coupon) {
+      return { valid: false, discount: 0, message: "Invalid coupon code" };
+    }
+
+    if (!coupon.isActive) {
+      return { valid: false, discount: 0, message: "This coupon is no longer active" };
+    }
+
+    // Check date range
+    const now = new Date();
+    if (coupon.startDate && new Date(coupon.startDate) > now) {
+      return { valid: false, discount: 0, message: "This coupon is not yet valid" };
+    }
+    if (coupon.endDate && new Date(coupon.endDate) < now) {
+      return { valid: false, discount: 0, message: "This coupon has expired" };
+    }
+
+    // Check usage limit
+    if (coupon.usageLimit && (coupon.usageCount ?? 0) >= coupon.usageLimit) {
+      return { valid: false, discount: 0, message: "This coupon has reached its usage limit" };
+    }
+
+    // Check minimum order amount
+    const minOrder = coupon.minOrderAmount ? parseFloat(coupon.minOrderAmount) : 0;
+    if (subtotal < minOrder) {
+      return { valid: false, discount: 0, message: `Minimum order amount is KES ${minOrder.toLocaleString()}` };
+    }
+
+    // Calculate discount
+    let discount = 0;
+    if (coupon.discountType === "percentage") {
+      discount = subtotal * (parseFloat(coupon.discountValue) / 100);
+      // Apply max discount cap
+      if (coupon.maxDiscountAmount) {
+        const maxDiscount = parseFloat(coupon.maxDiscountAmount);
+        discount = Math.min(discount, maxDiscount);
+      }
+    } else {
+      discount = parseFloat(coupon.discountValue);
+    }
+
+    // Don't allow discount to exceed subtotal
+    discount = Math.min(discount, subtotal);
+
+    return { valid: true, discount: Math.round(discount * 100) / 100 };
+  }
+
+  async incrementCouponUsage(id: number): Promise<void> {
+    await db
+      .update(coupons)
+      .set({ usageCount: sql`${coupons.usageCount} + 1` })
+      .where(eq(coupons.id, id));
+  }
+
+  // ==================== SAVED ADDRESSES ====================
+  async getAddresses(userId: number): Promise<SavedAddress[]> {
+    return await db.select().from(savedAddresses).where(eq(savedAddresses.userId, userId)).orderBy(desc(savedAddresses.createdAt));
+  }
+
+  async createAddress(data: any): Promise<SavedAddress> {
+    // If this is the first address or marked default, set it as default
+    const existing = await this.getAddresses(data.userId);
+    const isDefault = data.isDefault || existing.length === 0;
+    if (isDefault && existing.length > 0) {
+      await db.update(savedAddresses).set({ isDefault: false }).where(eq(savedAddresses.userId, data.userId));
+    }
+    const [address] = await db.insert(savedAddresses).values({ ...data, isDefault }).returning();
+    return address;
+  }
+
+  async updateAddress(id: number, data: Partial<SavedAddress>): Promise<SavedAddress | undefined> {
+    const [address] = await db
+      .update(savedAddresses)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(savedAddresses.id, id))
+      .returning();
+    return address;
+  }
+
+  async deleteAddress(id: number, userId: number): Promise<void> {
+    await db.delete(savedAddresses).where(and(eq(savedAddresses.id, id), eq(savedAddresses.userId, userId)));
+  }
+
+  async setDefaultAddress(id: number, userId: number): Promise<void> {
+    await db.update(savedAddresses).set({ isDefault: false }).where(eq(savedAddresses.userId, userId));
+    await db.update(savedAddresses).set({ isDefault: true }).where(eq(savedAddresses.id, id));
   }
 }
 

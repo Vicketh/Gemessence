@@ -3,6 +3,8 @@ import { AdminProductManager } from "@/components/admin/product-manager";
 import { AdminUserManager } from "@/components/admin/user-manager";
 import { AdminReviewManager } from "@/components/admin/review-manager";
 import { AdminMediaManager } from "@/components/admin/media-manager";
+import { AdminSettings } from "@/components/admin/admin-settings";
+import { AdminCouponManager } from "@/components/admin/admin-coupon-manager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -83,13 +85,15 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="coupons">Coupons</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -264,6 +268,14 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <AdminSettings />
+          </TabsContent>
+
+          <TabsContent value="coupons">
+            <AdminCouponManager />
           </TabsContent>
         </Tabs>
       </div>
