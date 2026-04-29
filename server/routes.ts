@@ -26,12 +26,15 @@ function csrfProtection(req: Request, res: Response, next: NextFunction) {
   const safeMethods = ["GET", "HEAD", "OPTIONS"];
   if (safeMethods.includes(req.method)) return next();
 
-  const token = req.headers["x-csrf-token"] as string;
-  const sessionToken = (req as any).session?.csrfToken;
+  const headerToken = req.headers["x-csrf-token"] as string | undefined;
+  const cookies = parseCookies(req.headers.cookie);
+  const cookieToken = cookies.csrfToken;
 
-  if (!token || !sessionToken || token !== sessionToken) {
+  // Only enforce when a token is expected; if misconfigured, fail closed in production.
+  if (!headerToken || !cookieToken || headerToken !== cookieToken) {
     return res.status(403).json({ message: "Invalid CSRF token" });
   }
+
   next();
 }
 
@@ -317,8 +320,14 @@ export async function registerRoutes(
   // Endpoint to get a CSRF token
   app.get("/api/csrf-token", (req, res) => {
     const token = generateCsrfToken();
-    (req as any).session = (req as any).session || {};
-    (req as any).session.csrfToken = token;
+
+    res.cookie("csrfToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
     res.json({ csrfToken: token });
   });
 

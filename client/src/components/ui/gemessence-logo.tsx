@@ -1,26 +1,31 @@
+import type React from "react";
+import logoPng from "@assets/Gemessence official logo.png";
+
 interface LogoProps {
   variant?: "full" | "mark";
   className?: string;
-  height?: number;
-  width?: number;
+  height?: number | string;
+  width?: number | string;
 }
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-export function GemessenceLogo({ className = "", height, width }: LogoProps) {
-  const aspectRatio = 240 / 50; // SVG aspect ratio
-  const resolvedHeight = height ?? 48;
-  const resolvedWidth = width ?? Math.round(resolvedHeight * aspectRatio);
-
+export function GemessenceLogo({
+  className = "",
+  height = 48,
+  width,
+}: LogoProps) {
   return (
-    <img
-      src={`${BASE}/logo.svg`}
-      alt="Gemessence"
-      height={resolvedHeight}
-      width={resolvedWidth}
-      className={`object-contain ${className}`}
-      draggable={false}
-      style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' }}
-    />
+    <div className={`relative flex items-center justify-center ${className}`}>
+      <img
+        src={logoPng}
+        alt="Gemessence Official Logo"
+        style={{ 
+          height: height, 
+          width: width || 'auto',
+          filter: "drop-shadow(0 2px 4px rgba(201, 162, 39, 0.3)) brightness(1.05) contrast(1.1)"
+        }}
+        className="object-contain transition-transform duration-300 hover:scale-105"
+        draggable={false}
+      />
+    </div>
   );
 }

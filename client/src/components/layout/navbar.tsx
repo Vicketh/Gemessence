@@ -35,10 +35,10 @@ export function Navbar() {
     <>
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "glass-panel shadow-lg" : "bg-transparent"}`}>
         {/* Main row */}
-        <div className="container mx-auto px-4 md:px-6 flex items-center justify-between h-16">
+        <div className="container mx-auto px-4 md:px-6 flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center group flex-shrink-0">
-            <GemessenceLogo height={36} className="group-hover:opacity-90 transition-opacity" />
+          <Link href="/" className="flex items-center group flex-shrink-0 py-2">
+            <GemessenceLogo height={56} className="group-hover:opacity-90 transition-opacity" />
           </Link>
 
           {/* Desktop nav */}
