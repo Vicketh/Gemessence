@@ -15,6 +15,7 @@ import { CloudinaryUploader } from "@/components/ui/cloudinary-uploader";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getProducts, createProduct, updateProduct, deleteProduct } from "@/lib/supabase";
+import { resolveImageUrl } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import type { CloudinaryResult } from "@/lib/cloudinary";
 
@@ -438,7 +439,7 @@ export function AdminProductManager() {
             <Card className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative aspect-square">
                 <img
-                  src={product.imageUrl}
+                  src={resolveImageUrl(product.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />

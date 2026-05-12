@@ -13,8 +13,9 @@ import { useLocation } from "wouter";
 
 export default function Dashboard() {
   const { user, isLoading: authLoading } = useAuth();
-  const { data: products, isLoading: productsLoading } = useProducts();
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { data: productsData, isLoading: productsLoading } = useProducts();
+  const products = productsData as any[] | undefined;
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [, setLocation] = useLocation();
 

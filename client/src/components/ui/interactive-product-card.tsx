@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/hooks/use-currency";
 import { useCartContext } from "@/hooks/use-cart-context";
 import { useToast } from "@/hooks/use-toast";
+import { resolveImageUrl } from "@/lib/utils";
 
 export interface ProductCardData {
   id: number;
@@ -84,7 +85,7 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
       {/* Image */}
       <div className="relative aspect-[4/5] overflow-hidden bg-muted">
         <motion.img
-          src={product.imageUrl}
+          src={resolveImageUrl(product.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
           alt={product.name}
           className="w-full h-full object-cover"
           animate={{ scale: isHovered ? 1.05 : 1 }}

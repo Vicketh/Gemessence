@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { resolveImageUrl } from "@/lib/utils";
 
 // These are set as Vite env vars (VITE_ prefix = exposed to browser)
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -13,6 +14,37 @@ export const supabase = createClient(
   SUPABASE_ANON_KEY || "placeholder"
 );
 
+function normalizeProduct(product: any) {
+  if (!product) return null;
+
+  const images: string[] = Array.isArray(product.images)
+    ? product.images
+    : product.images
+    ? [product.images]
+    : [];
+
+  return {
+    ...product,
+    imageUrl: resolveImageUrl(product.image_url ?? product.imageUrl) ?? undefined,
+    images: images
+      .map((img: string) => resolveImageUrl(img))
+      .filter((img): img is string => Boolean(img)),
+    compareAtPrice: product.compare_at_price ?? product.compareAtPrice,
+    categoryId: product.category_id ?? product.categoryId,
+    featured: product.featured ?? false,
+    inStock: product.in_stock ?? product.inStock,
+    stockQuantity: product.stock_quantity ?? product.stockQuantity,
+    metalType: product.metal_type ?? product.metalType,
+    metalColor: product.metal_color ?? product.metalColor,
+    gemstoneType: product.gemstone_type ?? product.gemstoneType,
+    gemstoneWeight: product.gemstone_weight ?? product.gemstoneWeight,
+    ringSizes: product.ring_sizes ?? product.ringSizes,
+    chainLength: product.chain_length ?? product.chainLength,
+    createdAt: product.created_at ?? product.createdAt,
+    updatedAt: product.updated_at ?? product.updatedAt,
+  };
+}
+
 // ─── PRODUCTS ────────────────────────────────────────────────────────────────
 export async function getProducts(filters?: {
   category?: string;
@@ -24,27 +56,33 @@ export async function getProducts(filters?: {
   if (filters?.featured) query = query.eq("featured", true);
   if (filters?.search) query = query.ilike("name", `%${filters.search}%`);
   const { data, error } = await query;
-  if (error) throw error;
-  return data ?? [];
+  if (error) {
+    console.warn("Failed to fetch products from Supabase:", error);
+    return [];
+  }
+  return (data ?? []).map(normalizeProduct);
 }
 
 export async function getProduct(id: number) {
   const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
-  if (error) throw error;
-  return data;
+  if (error) {
+    console.warn("Failed to fetch product from Supabase:", error);
+    return null;
+  }
+  return normalizeProduct(data);
 }
 
 export async function createProduct(product: any) {
   const slug = product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   const { data, error } = await supabase.from("products").insert({ ...product, slug }).select().single();
   if (error) throw error;
-  return data;
+  return normalizeProduct(data);
 }
 
 export async function updateProduct(id: number, product: any) {
   const { data, error } = await supabase.from("products").update({ ...product, updated_at: new Date().toISOString() }).eq("id", id).select().single();
   if (error) throw error;
-  return data;
+  return normalizeProduct(data);
 }
 
 export async function deleteProduct(id: number) {

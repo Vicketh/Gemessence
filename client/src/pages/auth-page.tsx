@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gem, ArrowRight, Mail, Lock, User } from "lucide-react";
+import { Gem, ArrowRight, Mail, Lock, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,7 +16,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import heroImg from "@assets/Hero_1772877259305.png";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// Jewelry model images from the assets
+const JEWELRY_IMAGES = [
+  `${BASE}/assets/Gem (1).png`,
+  `${BASE}/assets/Gem (2).png`,
+  `${BASE}/assets/Gem (3).png`,
+  `${BASE}/assets/Gem (4).png`,
+  `${BASE}/assets/Gem (5).png`,
+  `${BASE}/assets/Gem (6).png`,
+  `${BASE}/assets/Gem (7).png`,
+  `${BASE}/assets/Gem (8).png`,
+];
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -31,6 +44,8 @@ const registerSchema = z.object({
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
   const { user, login, register, isLoginPending, isRegisterPending } =
     useAuth();
   const [, setLocation] = useLocation();
@@ -40,6 +55,27 @@ export default function AuthPage() {
       setLocation("/dashboard");
     }
   }, [user, setLocation]);
+
+  // Auto-rotate images
+  useEffect(() => {
+    if (!isAutoPlay || JEWELRY_IMAGES.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % JEWELRY_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isAutoPlay]);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % JEWELRY_IMAGES.length);
+    setIsAutoPlay(false);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + JEWELRY_IMAGES.length) % JEWELRY_IMAGES.length
+    );
+    setIsAutoPlay(false);
+  };
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -61,15 +97,68 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      {/* Left side: Image/Branding */}
+      {/* Left side: Rotating Jewelry Images */}
       <div className="hidden lg:flex w-1/2 relative flex-col justify-between overflow-hidden">
+        {/* Image carousel background */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-black/30 z-10" />
-          <img
-            src={heroImg}
-            alt="Opulence"
-            className="w-full h-full object-cover scale-105"
-          />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              className="absolute inset-0"
+            >
+              <img
+                src={JEWELRY_IMAGES[currentImageIndex]}
+                alt="Luxury Jewelry"
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-black/40 z-10" />
+          
+          {/* Gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/0 to-black/40 z-10" />
+        </div>
+
+        {/* Navigation controls */}
+        <div className="absolute bottom-12 left-0 right-0 flex items-center justify-center gap-4 z-30">
+          <button
+            onClick={prevImage}
+            className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          
+          {/* Slide indicators */}
+          <div className="flex gap-2">
+            {JEWELRY_IMAGES.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setCurrentImageIndex(idx);
+                  setIsAutoPlay(false);
+                }}
+                className={`h-2 rounded-full transition-all ${
+                  idx === currentImageIndex
+                    ? "bg-primary w-6"
+                    : "bg-white/30 w-2 hover:bg-white/50"
+                }`}
+                aria-label={`Go to image ${idx + 1}`}
+              />
+            ))}
+          </div>
+          
+          <button
+            onClick={nextImage}
+            className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
 
         <div className="relative z-20 p-12 flex flex-col h-full justify-between">

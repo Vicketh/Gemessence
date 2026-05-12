@@ -23,9 +23,11 @@ import {
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import { useProducts } from "@/hooks/use-products";
 import { useToast } from "@/hooks/use-toast";
+import { resolveImageUrl } from "@/lib/utils";
 
 export default function AdminProducts() {
-  const { data: products = [] } = useProducts();
+  const { data: productsData = [] } = useProducts();
+  const products = productsData as any[];
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -162,7 +164,7 @@ export default function AdminProducts() {
                     <TableCell>
                       <div className="w-12 h-12 rounded bg-muted">
                         <img
-                          src={product.imageUrl}
+                          src={resolveImageUrl(product.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
                           alt={product.name}
                           className="w-full h-full object-cover rounded"
                         />

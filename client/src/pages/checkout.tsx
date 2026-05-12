@@ -3,6 +3,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
 import { useOrders, useConfig, useShippingCost } from "@/hooks/use-orders";
+import { resolveImageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -408,7 +409,7 @@ export default function CheckoutPage() {
                           <div key={item.id} className="flex gap-3">
                             <div className="w-16 h-16 rounded bg-muted flex-shrink-0">
                               <img
-                                src={item.product.imageUrl}
+                                src={resolveImageUrl(item.product.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
                                 alt={item.product.name}
                                 className="w-full h-full object-cover rounded"
                               />

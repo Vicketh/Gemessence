@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { resolveImageUrl } from "@/lib/utils";
 import { Link } from "wouter";
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, Heart } from "lucide-react";
 import { motion } from "framer-motion";
@@ -105,7 +106,7 @@ export default function CartPage() {
                     {/* Product Image */}
                     <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
                       <img
-                        src={item.product.imageUrl}
+                        src={resolveImageUrl(item.product.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
                         alt={item.product.name}
                         className="w-full h-full object-cover"
                       />

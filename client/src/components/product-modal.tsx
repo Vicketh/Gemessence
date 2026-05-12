@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCartContext } from "@/hooks/use-cart-context";
 import { useCurrency } from "@/hooks/use-currency";
 import { useToast } from "@/hooks/use-toast";
+import { resolveImageUrl } from "@/lib/utils";
 import type { ProductCardData } from "@/components/ui/interactive-product-card";
 
 interface ProductModalProps {
@@ -24,7 +25,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
 
   if (!product) return null;
 
-  const images = [product.imageUrl].filter(Boolean);
+  const images = [resolveImageUrl(product.imageUrl)].filter(Boolean) as string[];
   const inCart = isInCart(product.id);
   const price = parseFloat(product.price);
   const comparePrice = product.compareAtPrice ? parseFloat(product.compareAtPrice) : null;
@@ -71,7 +72,7 @@ export function ProductModal({ product, onClose }: ProductModalProps) {
                 key={activeImg}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                src={images[activeImg] || product.imageUrl}
+                src={images[activeImg] || resolveImageUrl(product.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
                 alt={product.name}
                 className="w-full h-full object-cover object-center"
               />

@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { useOrders } from "@/hooks/use-orders";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { resolveImageUrl } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
@@ -142,7 +143,7 @@ export default function OrdersPage() {
                               <div key={item.id} className="flex-shrink-0 w-20 h-20 rounded bg-muted">
                                 {item.productImageUrl && (
                                   <img
-                                    src={item.productImageUrl}
+                                    src={resolveImageUrl(item.productImageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
                                     alt={item.productName}
                                     className="w-full h-full object-cover rounded"
                                   />

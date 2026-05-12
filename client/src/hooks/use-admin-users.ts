@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { type User } from "@shared/schema";
+import { getUsers, updateUserRole } from "@/lib/supabase";
 import { useToast } from "./use-toast";
-import { apiUrl } from "@/lib/utils";
 
 export function useAdminUsers() {
   const queryClient = useQueryClient();
@@ -9,58 +8,34 @@ export function useAdminUsers() {
 
   const { data: admins = [], isLoading } = useQuery({
     queryKey: ["admin-users"],
-    queryFn: async () => {
-      const res = await fetch(apiUrl("/api/superuser/admins"));
-      if (!res.ok) throw new Error("Failed to fetch admins");
-      return res.json();
-    },
+    queryFn: () => getUsers(),
   });
 
   const promoteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
-      const res = await fetch(apiUrl(`/api/superuser/admins/${userId}`), {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error("Failed to promote user");
-      return res.json();
+      await updateUserRole(userId, true);
+      return { userId };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({
-        title: "Success",
-        description: "User has been promoted to admin.",
-      });
+      toast({ title: "Success", description: "User has been promoted to admin." });
     },
     onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to promote user.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to promote user.", variant: "destructive" });
     },
   });
 
   const demoteAdminMutation = useMutation({
     mutationFn: async (userId: number) => {
-      const res = await fetch(apiUrl(`/api/superuser/admins/${userId}`), {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("Failed to demote admin");
-      return res.json();
+      await updateUserRole(userId, false);
+      return { userId };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({
-        title: "Success",
-        description: "Admin has been demoted.",
-      });
+      toast({ title: "Success", description: "Admin has been demoted." });
     },
     onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to demote admin.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to demote admin.", variant: "destructive" });
     },
   });
 

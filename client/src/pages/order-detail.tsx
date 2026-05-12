@@ -7,6 +7,7 @@ import { Link, useParams } from "wouter";
 import { ArrowLeft, Package, Calendar, CreditCard, Truck, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { resolveImageUrl } from "@/lib/utils";
 
 export default function OrderDetailPage() {
   const params = useParams<{ id: string }>();
@@ -169,7 +170,7 @@ export default function OrderDetailPage() {
                           <div className="w-24 h-24 rounded-lg bg-muted flex-shrink-0 overflow-hidden">
                             {item.productImageUrl && (
                               <img
-                                src={item.productImageUrl}
+                                src={resolveImageUrl(item.productImageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
                                 alt={item.productName}
                                 className="w-full h-full object-cover"
                               />

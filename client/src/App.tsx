@@ -7,7 +7,6 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
 import { CurrencyProvider } from "@/hooks/use-currency";
 import { CartProvider } from "@/hooks/use-cart-context";
-import { PageTransition } from "@/components/layout/page-transition";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import AuthPage from "@/pages/auth-page";
@@ -35,7 +34,6 @@ function Router() {
       <Route path="/orders/:id" component={OrderDetailPage} />
       <Route path="/wishlist" component={WishlistPage} />
       <Route path="/product/:slug" component={ProductDetailPage} />
-      {/* Admin Routes */}
       <Route path="/admin" component={AdminDashboardNew} />
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/orders" component={AdminOrders} />
@@ -54,9 +52,7 @@ function App() {
             <AuthProvider>
               <TooltipProvider>
                 <Toaster />
-                <PageTransition>
-                  <Router />
-                </PageTransition>
+                <Router />
               </TooltipProvider>
             </AuthProvider>
           </QueryClientProvider>

@@ -5,6 +5,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function resolveImageUrl(url?: string | null): string | undefined {
+  if (!url) return undefined;
+  if (/^(https?:\/\/|data:|blob:)/.test(url)) return url;
+  const base = import.meta.env.BASE_URL || "/";
+  if (url.startsWith("/")) {
+    return `${base.replace(/\/$/, "")}${url}`;
+  }
+  return `${base}${url}`;
+}
+
 // API base URL for different environments
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 

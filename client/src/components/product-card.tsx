@@ -3,6 +3,7 @@ import { type Product } from "@shared/schema";
 import { ShoppingBag, Eye } from "lucide-react";
 import { Button } from "./ui/button";
 import { useCurrency } from "@/hooks/use-currency";
+import { resolveImageUrl } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
@@ -27,7 +28,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
         <motion.img
           layoutId={`product-image-${product.id}`}
           src={
-            product.imageUrl ||
+            resolveImageUrl(product.imageUrl) ||
             "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"
           }
           alt={product.name}

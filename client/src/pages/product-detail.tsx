@@ -26,7 +26,8 @@ import type { Product } from "@shared/schema";
 export default function ProductDetailPage() {
   const [, params] = useRoute("/product/:slug");
   const [, setLocation] = useLocation();
-  const { data: products } = useProducts();
+  const { data: productsData } = useProducts();
+  const products = (productsData as any[]) ?? [];
   const { addItem } = useCartContext();
   const { formatPrice } = useCurrency();
   const { toast } = useToast();

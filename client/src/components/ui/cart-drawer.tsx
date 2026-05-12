@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCartContext } from "@/hooks/use-cart-context";
 import { useCurrency } from "@/hooks/use-currency";
 import { Link } from "wouter";
+import { resolveImageUrl } from "@/lib/utils";
 
 interface CartDrawerProps {
   open: boolean;
@@ -80,7 +81,12 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                     className="flex gap-4 p-4 bg-background rounded-xl border border-border/50"
                   >
                     <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" loading="lazy" />
+                      <img
+                        src={resolveImageUrl(item.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-0.5">{item.category}</p>
