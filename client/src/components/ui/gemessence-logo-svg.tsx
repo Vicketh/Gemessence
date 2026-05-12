@@ -7,185 +7,116 @@ interface LogoProps {
   variant?: "full" | "mark";
 }
 
+/**
+ * SVG logo matching the official Gemessence logo PNG:
+ * - Large crimson "G" letterform (thick stroke, open on right)
+ * - Gold faceted gem/diamond shape centred inside the G
+ * - Italic serif "Gemessence" wordmark to the right
+ * - Thin gold decorative underline swoosh beneath the text
+ * - Small 4-pointed gold star accent top-right of the mark
+ */
 export function GemessenceLogoSVG({
   className = "",
   height = 48,
   width,
   variant = "full",
 }: LogoProps) {
-  const viewBoxWidth = variant === "full" ? 1200 : 300;
-  const viewBoxHeight = 300;
-  
+  const vbW = variant === "full" ? 520 : 120;
+  const vbH = 120;
+
+  // Shared gem shape centred at (cx, cy) with half-height hh
+  const Gem = ({ cx, cy, hh }: { cx: number; cy: number; hh: number }) => {
+    const hw = hh * 0.62;
+    const mh = hh * 0.28;
+    return (
+      <g>
+        {/* crown */}
+        <polygon points={`${cx},${cy - hh} ${cx + hw * 0.7},${cy - mh} ${cx - hw * 0.7},${cy - mh}`} fill="#C9A227" />
+        {/* girdle */}
+        <polygon points={`${cx - hw * 0.7},${cy - mh} ${cx + hw * 0.7},${cy - mh} ${cx + hw},${cy + mh} ${cx - hw},${cy + mh}`} fill="#E8C84A" />
+        {/* pavilion */}
+        <polygon points={`${cx - hw},${cy + mh} ${cx + hw},${cy + mh} ${cx},${cy + hh}`} fill="#C9A227" />
+        {/* centre facet line */}
+        <line x1={cx} y1={cy - hh} x2={cx} y2={cy + hh} stroke="rgba(0,0,0,0.18)" strokeWidth="1" />
+        <line x1={cx - hw * 0.7} y1={cy - mh} x2={cx + hw * 0.7} y2={cy - mh} stroke="rgba(0,0,0,0.12)" strokeWidth="0.8" />
+      </g>
+    );
+  };
+
   return (
     <svg
-      viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
-      className={`${className}`}
+      viewBox={`0 0 ${vbW} ${vbH}`}
+      className={className}
       style={{ height, width: width || "auto" }}
       preserveAspectRatio="xMidYMid meet"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {variant === "full" ? (
-        // Full logo with text
-        <g>
-          {/* 8-Pointed Star */}
-          <g id="star">
-            <path
-              d="M 900 40 L 910 80 L 950 90 L 910 100 L 900 140 L 890 100 L 850 90 L 890 80 Z"
-              fill="none"
-              stroke="#D4AF37"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <circle cx="900" cy="90" r="3" fill="#D4AF37" />
-          </g>
+      {/* ── MARK (G + gem + star) ── */}
+      <g id="mark">
+        {/* Thick crimson G — open arc on the right, horizontal bar mid-right */}
+        <path
+          d="M 95 18 A 42 42 0 1 0 95 102 L 95 72 L 72 72"
+          fill="none"
+          stroke="#8B0000"
+          strokeWidth="18"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {/* Thin gold outline on G */}
+        <path
+          d="M 95 18 A 42 42 0 1 0 95 102 L 95 72 L 72 72"
+          fill="none"
+          stroke="#C9A227"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.85"
+        />
 
-          {/* Main G Shape with Gem Inside */}
-          <g id="logo-mark">
-            {/* Red/Crimson G Outer Shape */}
-            <path
-              d="M 150 80 Q 80 80 80 150 Q 80 220 150 220 Q 200 220 230 190 L 200 160 Q 185 175 150 175 Q 110 175 110 150 Q 110 125 150 125 Q 180 125 200 145 L 230 115 Q 200 85 150 80 Z"
-              fill="none"
-              stroke="#DC143C"
-              strokeWidth="28"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+        {/* Gem centred inside the G */}
+        <Gem cx={55} cy={60} hh={22} />
 
-            {/* Gold/Yellow outline for G */}
-            <path
-              d="M 150 80 Q 80 80 80 150 Q 80 220 150 220 Q 200 220 230 190 L 200 160 Q 185 175 150 175 Q 110 175 110 150 Q 110 125 150 125 Q 180 125 200 145 L 230 115 Q 200 85 150 80 Z"
-              fill="none"
-              stroke="#D4AF37"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity="0.8"
-            />
+        {/* 4-pointed star top-right of mark */}
+        <path
+          d="M 100 12 L 102.5 19 L 110 21.5 L 102.5 24 L 100 31 L 97.5 24 L 90 21.5 L 97.5 19 Z"
+          fill="#C9A227"
+          opacity="0.9"
+        />
+      </g>
 
-            {/* Gem Shape Inside G */}
-            <g id="gem" transform="translate(140, 130)">
-              {/* Top triangle (diamond) */}
-              <polygon
-                points="0,-25 15,-5 -15,-5"
-                fill="#D4AF37"
-                stroke="#1a1a1a"
-                strokeWidth="2"
-              />
-              {/* Middle diamond/square */}
-              <polygon
-                points="0,-5 25,15 0,35 -25,15"
-                fill="#D4AF37"
-                stroke="#1a1a1a"
-                strokeWidth="2"
-              />
-              {/* Bottom triangle */}
-              <polygon
-                points="0,35 15,55 -15,55"
-                fill="#D4AF37"
-                stroke="#1a1a1a"
-                strokeWidth="2"
-              />
-              {/* Inner highlights */}
-              <line x1="0" y1="-25" x2="0" y2="55" stroke="#1a1a1a" strokeWidth="1.5" opacity="0.4" />
-            </g>
-          </g>
-
-          {/* Gemessence Text */}
+      {variant === "full" && (
+        <g id="wordmark">
+          {/* Italic serif wordmark */}
           <text
-            x="350"
-            y="170"
-            fontSize="140"
-            fontFamily="Georgia, serif"
+            x="128"
+            y="74"
+            fontSize="52"
+            fontFamily="'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif"
             fontStyle="italic"
-            fill="#1a1a1a"
-            fontWeight="500"
-            letterSpacing="2"
+            fontWeight="600"
+            fill="currentColor"
+            letterSpacing="1"
           >
             Gemessence
           </text>
 
-          {/* Decorative swoosh line */}
+          {/* Decorative underline swoosh — crimson + gold */}
           <path
-            d="M 350 200 Q 600 215 950 190"
+            d="M 128 84 Q 320 96 510 82"
             fill="none"
-            stroke="#DC143C"
-            strokeWidth="6"
-            strokeLinecap="round"
-            opacity="0.8"
-          />
-          <path
-            d="M 350 200 Q 600 215 950 190"
-            fill="none"
-            stroke="#D4AF37"
-            strokeWidth="2"
-            strokeLinecap="round"
-            opacity="0.6"
-          />
-        </g>
-      ) : (
-        // Mark only (for favicon, etc.)
-        <g id="mark-only">
-          {/* 8-Pointed Star */}
-          <g id="star">
-            <path
-              d="M 200 40 L 210 80 L 250 90 L 210 100 L 200 140 L 190 100 L 150 90 L 190 80 Z"
-              fill="none"
-              stroke="#D4AF37"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <circle cx="200" cy="90" r="3" fill="#D4AF37" />
-          </g>
-
-          {/* Red/Crimson G */}
-          <path
-            d="M 100 80 Q 40 80 40 150 Q 40 220 100 220 Q 140 220 160 190 L 140 165 Q 130 175 100 175 Q 70 175 70 150 Q 70 125 100 125 Q 120 125 140 145 L 160 120 Q 140 85 100 80 Z"
-            fill="none"
-            stroke="#DC143C"
-            strokeWidth="24"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-
-          {/* Gold outline */}
-          <path
-            d="M 100 80 Q 40 80 40 150 Q 40 220 100 220 Q 140 220 160 190 L 140 165 Q 130 175 100 175 Q 70 175 70 150 Q 70 125 100 125 Q 120 125 140 145 L 160 120 Q 140 85 100 80 Z"
-            fill="none"
-            stroke="#D4AF37"
+            stroke="#8B0000"
             strokeWidth="3"
             strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.8"
+            opacity="0.85"
           />
-
-          {/* Gem Shape */}
-          <g id="gem" transform="translate(90, 140)">
-            {/* Top triangle */}
-            <polygon
-              points="0,-20 12,-3 -12,-3"
-              fill="#D4AF37"
-              stroke="#1a1a1a"
-              strokeWidth="1.5"
-            />
-            {/* Middle diamond */}
-            <polygon
-              points="0,-3 20,12 0,27 -20,12"
-              fill="#D4AF37"
-              stroke="#1a1a1a"
-              strokeWidth="1.5"
-            />
-            {/* Bottom triangle */}
-            <polygon
-              points="0,27 12,42 -12,42"
-              fill="#D4AF37"
-              stroke="#1a1a1a"
-              strokeWidth="1.5"
-            />
-            {/* Inner line */}
-            <line x1="0" y1="-20" x2="0" y2="42" stroke="#1a1a1a" strokeWidth="1" opacity="0.3" />
-          </g>
+          <path
+            d="M 128 84 Q 320 96 510 82"
+            fill="none"
+            stroke="#C9A227"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            opacity="0.7"
+          />
         </g>
       )}
     </svg>

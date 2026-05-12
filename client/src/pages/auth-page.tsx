@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gem, ArrowRight, Mail, Lock, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { Gem, ArrowRight, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,16 +19,10 @@ import { Input } from "@/components/ui/input";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-// Jewelry model images from the assets
+// Slideshow hero images — portrait shots featuring models with jewelry
 const JEWELRY_IMAGES = [
-  `${BASE}/assets/Gem (1).png`,
-  `${BASE}/assets/Gem (2).png`,
-  `${BASE}/assets/Gem (3).png`,
-  `${BASE}/assets/Gem (4).png`,
-  `${BASE}/assets/Gem (5).png`,
-  `${BASE}/assets/Gem (6).png`,
-  `${BASE}/assets/Gem (7).png`,
-  `${BASE}/assets/Gem (8).png`,
+  `${BASE}/Gemini_Generated_Image_b8tezgb8tezgb8te.png`,
+  `${BASE}/Gemini_Generated_Image_qkhmuyqkhmuyqkhm.png`,
 ];
 
 const loginSchema = z.object({
@@ -65,18 +59,6 @@ export default function AuthPage() {
     return () => clearInterval(interval);
   }, [isAutoPlay]);
 
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % JEWELRY_IMAGES.length);
-    setIsAutoPlay(false);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex(
-      (prev) => (prev - 1 + JEWELRY_IMAGES.length) % JEWELRY_IMAGES.length
-    );
-    setIsAutoPlay(false);
-  };
-
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: { username: "", password: "" },
@@ -97,94 +79,73 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      {/* Left side: Rotating Jewelry Images */}
-      <div className="hidden lg:flex w-1/2 relative flex-col justify-between overflow-hidden">
-        {/* Image carousel background */}
-        <div className="absolute inset-0 z-0">
+      {/* Left side: Split panel — model hero top, jewelry piece bottom */}
+      <div className="hidden lg:flex w-1/2 relative flex-col overflow-hidden">
+        {/* Top 65%: model hero image with slide transition */}
+        <div className="relative flex-[65] overflow-hidden">
           <AnimatePresence mode="wait">
-            <motion.div
+            <motion.img
               key={currentImageIndex}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              src={JEWELRY_IMAGES[currentImageIndex]}
+              alt="Luxury Jewelry Model"
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8 }}
-              className="absolute inset-0"
-            >
-              <img
-                src={JEWELRY_IMAGES[currentImageIndex]}
-                alt="Luxury Jewelry"
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
+              transition={{ duration: 0.9 }}
+              className="absolute inset-0 w-full h-full object-cover object-top"
+            />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-black/40 z-10" />
-          
-          {/* Gradient overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/0 to-black/40 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
+
+          {/* Brand mark top-left */}
+          <div className="absolute top-8 left-8 z-20 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-lg">
+              <Gem className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-display text-xl font-bold tracking-wider text-white drop-shadow">GemEssence</span>
+          </div>
+
+          {/* Headline bottom of top panel */}
+          <div className="absolute bottom-6 left-8 right-8 z-20">
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="font-display text-4xl font-bold text-white leading-tight mb-2"
+            >
+              Enter a World of<br />
+              <span className="text-primary">Unrivaled Elegance</span>
+            </motion.h1>
+          </div>
         </div>
 
-        {/* Navigation controls */}
-        <div className="absolute bottom-12 left-0 right-0 flex items-center justify-center gap-4 z-30">
-          <button
-            onClick={prevImage}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
-            aria-label="Previous image"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          
+        {/* Bottom 35%: jewelry close-up */}
+        <div className="relative flex-[35] overflow-hidden">
+          <img
+            src={`${BASE}/assets/new/Gem (1).png`}
+            alt="Gemessence Jewelry"
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-6 left-8 right-8 z-10">
+            <p className="text-white/85 text-sm font-light leading-relaxed">
+              Join our exclusive clientele to unlock personalized curations,
+              early access to new collections, and bespoke services.
+            </p>
+          </div>
+
           {/* Slide indicators */}
-          <div className="flex gap-2">
+          <div className="absolute top-4 right-6 flex gap-2 z-10">
             {JEWELRY_IMAGES.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => {
-                  setCurrentImageIndex(idx);
-                  setIsAutoPlay(false);
-                }}
-                className={`h-2 rounded-full transition-all ${
-                  idx === currentImageIndex
-                    ? "bg-primary w-6"
-                    : "bg-white/30 w-2 hover:bg-white/50"
+                onClick={() => { setCurrentImageIndex(idx); setIsAutoPlay(false); }}
+                className={`h-1.5 rounded-full transition-all ${
+                  idx === currentImageIndex ? "bg-primary w-5" : "bg-white/40 w-1.5 hover:bg-white/60"
                 }`}
                 aria-label={`Go to image ${idx + 1}`}
               />
             ))}
-          </div>
-          
-          <button
-            onClick={nextImage}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm transition-all"
-            aria-label="Next image"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="relative z-20 p-12 flex flex-col h-full justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
-              <Gem className="w-5 h-5" />
-            </div>
-            <span className="font-display text-2xl font-bold tracking-wider text-white">
-              GemEssence
-            </span>
-          </div>
-
-          <div className="max-w-xl">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="font-display text-5xl font-bold text-white mb-6 leading-tight"
-            >
-              Enter a World of <br />
-              <span className="text-primary">Unrivaled Elegance</span>
-            </motion.h1>
-            <p className="text-white/80 text-lg font-light">
-              Join our exclusive clientele to unlock personalized curations,
-              early access to new collections, and seamless bespoke services.
-            </p>
           </div>
         </div>
       </div>

@@ -10,8 +10,9 @@ import { motion } from "framer-motion";
 
 export default function WishlistPage() {
   const { user } = useAuth();
-  const { wishlist, isLoading, removeFromWishlist } = useWishlist(user?.id);
-  const { data: products } = useProducts();
+  const { wishlistIds, isLoading, removeFromWishlist } = useWishlist(user?.id);
+  const { data: productsData } = useProducts();
+  const products = (productsData as any[]) ?? [];
 
   if (!user) {
     return (
@@ -29,7 +30,7 @@ export default function WishlistPage() {
     );
   }
 
-  const wishlistProducts = wishlist?.map((item: any) => item.product).filter(Boolean) || [];
+  const wishlistProducts = products.filter((p: any) => wishlistIds.includes(p.id));
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -72,7 +73,7 @@ export default function WishlistPage() {
                       variant="outline"
                       size="sm"
                       className="w-full mt-3"
-                      onClick={() => removeFromWishlist(user.id!, product.id)}
+                      onClick={() => removeFromWishlist(user.id, product.id)}
                     >
                       Remove from Wishlist
                     </Button>

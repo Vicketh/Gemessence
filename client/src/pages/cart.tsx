@@ -1,73 +1,29 @@
 import { Navbar } from "@/components/layout/navbar";
-import { useCart } from "@/hooks/use-cart";
-import { useAuth } from "@/hooks/use-auth";
+import { useCartContext } from "@/hooks/use-cart-context";
+import { useCurrency } from "@/hooks/use-currency";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { resolveImageUrl } from "@/lib/utils";
 import { Link } from "wouter";
-import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, Heart } from "lucide-react";
-import { motion } from "framer-motion";
-import { useWishlist } from "@/hooks/use-wishlist";
-import { useEffect, useState } from "react";
+import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { resolveImageUrl } from "@/lib/utils";
 
 export default function CartPage() {
-  const { user } = useAuth();
-  const sessionId = localStorage.getItem("cart_session_id") || `guest-${Date.now()}`;
-  const { cart, isLoading, removeCartItem, updateCartItem, clearCart } = useCart(sessionId);
-  const { addToWishlist } = useWishlist(user?.id);
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const { items, totalItems, subtotal, removeItem, updateQty, clearCart } = useCartContext();
+  const { formatPrice } = useCurrency();
 
-  useEffect(() => {
-    if (!localStorage.getItem("cart_session_id")) {
-      localStorage.setItem("cart_session_id", sessionId);
-    }
-  }, [sessionId]);
-
-  const handleQuantityChange = (itemId: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    setQuantities(prev => ({ ...prev, [itemId]: newQuantity }));
-    updateCartItem({ cartItemId: itemId, data: { quantity: newQuantity } });
-  };
-
-  const formatPrice = (price: string) => {
-    return new Intl.NumberFormat("en-KE", {
-      style: "currency",
-      currency: "KES",
-    }).format(parseFloat(price));
-  };
-
-  if (isLoading) {
+  if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading your cart...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!cart || cart.items.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center bg-background">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-md px-4"
-          >
+        <div className="flex-1 flex items-center justify-center bg-background pt-20">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-md px-4">
             <ShoppingBag className="w-24 h-24 mx-auto text-muted-foreground/30 mb-6" />
             <h1 className="font-display text-3xl font-bold mb-4">Your Cart is Empty</h1>
             <p className="text-muted-foreground mb-8">
-              Discover our exquisite collection of fine jewelry and find the perfect piece to celebrate your special moments.
+              Discover our exquisite collection of fine jewelry and find the perfect piece.
             </p>
-            <Link href="/">
-              <Button className="gold-glow">
+            <Link href="/#collections">
+              <Button className="gold-glow-hover">
                 Start Shopping <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
@@ -77,178 +33,114 @@ export default function CartPage() {
     );
   }
 
+  const tax = subtotal * 0.16;
+  const total = subtotal + tax;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-
-      <div className="flex-1 py-12">
+      <div className="flex-1 py-12 pt-24">
         <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <h1 className="font-display text-4xl font-bold mb-2">Shopping Cart</h1>
-            <p className="text-muted-foreground mb-8">
-              {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"} in your cart
-            </p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="font-display text-4xl font-bold">Shopping Cart</h1>
+                <p className="text-muted-foreground mt-1">{totalItems} {totalItems === 1 ? "item" : "items"}</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={clearCart} className="text-destructive border-destructive/30 hover:bg-destructive/10">
+                Clear Cart
+              </Button>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
+              {/* Items */}
               <div className="lg:col-span-2 space-y-4">
-                {cart.items.map((item: any, index: number) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="bg-card rounded-2xl border border-border/50 p-6 flex gap-6"
-                  >
-                    {/* Product Image */}
-                    <div className="w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
-                      <img
-                        src={resolveImageUrl(item.product.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=800&q=80"}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                <AnimatePresence>
+                  {items.map((item, index) => (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-card rounded-2xl border border-border/50 p-5 flex gap-5"
+                    >
+                      <Link href={`/product/${item.slug || item.id}`} className="w-28 h-28 flex-shrink-0 rounded-xl overflow-hidden bg-muted block">
+                        <img
+                          src={resolveImageUrl(item.imageUrl) || "https://images.unsplash.com/photo-1599643478524-fb66f70d00f8?w=400&q=80"}
+                          alt={item.name}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      </Link>
 
-                    {/* Product Details */}
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-1">
-                              {item.product.category}
-                            </p>
-                            <h3 className="font-display text-xl font-bold">{item.product.name}</h3>
+                      <div className="flex-1 flex flex-col justify-between min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-0.5">{item.category}</p>
+                            <Link href={`/product/${item.slug || item.id}`}>
+                              <h3 className="font-display text-lg font-bold hover:text-primary transition-colors line-clamp-1">{item.name}</h3>
+                            </Link>
                           </div>
-                          <p className="font-display text-xl font-bold text-primary">
-                            {formatPrice(item.priceAtAdd)}
+                          <p className="font-display text-lg font-bold text-primary flex-shrink-0">
+                            {formatPrice((item.price * item.quantity).toString())}
                           </p>
                         </div>
 
-                        {/* Selected Options */}
-                        {(item.ringSize || item.metalType || item.metalColor || item.chainLength) && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {item.ringSize && (
-                              <span className="text-xs bg-muted px-2 py-1 rounded">Size: {item.ringSize}</span>
-                            )}
-                            {item.metalType && (
-                              <span className="text-xs bg-muted px-2 py-1 rounded">{item.metalType}</span>
-                            )}
-                            {item.metalColor && (
-                              <span className="text-xs bg-muted px-2 py-1 rounded">{item.metalColor}</span>
-                            )}
-                            {item.chainLength && (
-                              <span className="text-xs bg-muted px-2 py-1 rounded">{item.chainLength}</span>
-                            )}
-                            {item.giftWrap && (
-                              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">🎁 Gift Wrapped</span>
-                            )}
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center gap-2 border border-border rounded-full px-3 py-1">
+                            <button onClick={() => updateQty(item.id, item.quantity - 1)} className="h-6 w-6 flex items-center justify-center hover:text-primary transition-colors">
+                              <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="w-6 text-center text-sm font-bold">{item.quantity}</span>
+                            <button onClick={() => updateQty(item.id, item.quantity + 1)} className="h-6 w-6 flex items-center justify-center hover:text-primary transition-colors">
+                              <Plus className="w-3 h-3" />
+                            </button>
                           </div>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between mt-4">
-                        {/* Quantity Controls */}
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                          <Input
-                            type="number"
-                            value={item.quantity}
-                            readOnly
-                            className="w-16 text-center h-8"
-                          />
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => addToWishlist(item.productId)}
-                          >
-                            <Heart className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => removeCartItem(item.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground">{formatPrice(item.price.toString())} each</span>
+                            <button onClick={() => removeItem(item.id)} className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors rounded-full hover:bg-destructive/10 ml-2">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
-
-                {/* Clear Cart */}
-                <Button
-                  variant="outline"
-                  onClick={() => clearCart()}
-                  className="w-full"
-                >
-                  Clear Cart
-                </Button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
 
-              {/* Order Summary */}
+              {/* Summary */}
               <div className="lg:col-span-1">
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="bg-card rounded-2xl border border-border/50 p-6 sticky top-4"
-                >
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-card rounded-2xl border border-border/50 p-6 sticky top-24">
                   <h2 className="font-display text-2xl font-bold mb-6">Order Summary</h2>
-
-                  <div className="space-y-4 mb-6">
+                  <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-muted-foreground">
-                      <span>Subtotal</span>
-                      <span>{formatPrice(cart.subtotal.toString())}</span>
+                      <span>Subtotal ({totalItems} items)</span>
+                      <span>{formatPrice(subtotal.toString())}</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Shipping</span>
-                      <span>Calculated at checkout</span>
+                      <span className="text-green-500 text-sm">Calculated at checkout</span>
                     </div>
                     <div className="flex justify-between text-muted-foreground">
                       <span>Tax (16% VAT)</span>
-                      <span>{formatPrice((cart.subtotal * 0.16).toString())}</span>
+                      <span>{formatPrice(tax.toString())}</span>
                     </div>
-                    <div className="border-t border-border pt-4 flex justify-between font-bold text-lg">
-                      <span>Total</span>
-                      <span className="text-primary">
-                        {formatPrice((cart.subtotal * 1.16).toString())}
-                      </span>
+                    <div className="border-t border-border pt-3 flex justify-between font-bold text-lg">
+                      <span>Estimated Total</span>
+                      <span className="text-primary">{formatPrice(total.toString())}</span>
                     </div>
                   </div>
-
                   <Link href="/checkout">
-                    <Button className="w-full gold-glow text-lg py-6">
-                      Proceed to Checkout <ArrowRight className="w-5 h-5 ml-2" />
+                    <Button className="w-full gold-glow-hover text-base h-12">
+                      Proceed to Checkout <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
-
-                  <p className="text-xs text-muted-foreground text-center mt-4">
-                    Secure checkout powered by M-Pesa
-                  </p>
+                  <Link href="/#collections">
+                    <Button variant="outline" className="w-full mt-3">Continue Shopping</Button>
+                  </Link>
+                  <p className="text-xs text-muted-foreground text-center mt-4">🔒 Secure checkout powered by M-Pesa</p>
                 </motion.div>
               </div>
             </div>

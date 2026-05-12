@@ -1,90 +1,42 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@shared/routes";
+import { useState, useCallback } from "react";
+import { getLocalWishlist, saveLocalWishlist } from "@/lib/supabase";
 import { useToast } from "./use-toast";
 
+// Wishlist is localStorage-backed for GitHub Pages (static) mode.
+// When a backend is available it can be extended to sync server-side.
 export function useWishlist(userId?: number) {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [wishlistIds, setWishlistIds] = useState<number[]>(() => getLocalWishlist());
 
-  const { data: wishlist, isLoading } = useQuery({
-    queryKey: [api.wishlist.get.path, userId],
-    queryFn: async () => {
-      if (!userId) return [];
-      const res = await fetch(`${api.wishlist.get.path}?userId=${userId}`);
-      if (!res.ok) return [];
-      return res.json();
-    },
-    enabled: !!userId,
-  });
+  const addToWishlist = useCallback((uid: number | undefined, productId: number) => {
+    setWishlistIds(prev => {
+      if (prev.includes(productId)) return prev;
+      const next = [...prev, productId];
+      saveLocalWishlist(next);
+      return next;
+    });
+    toast({ title: "Saved to Wishlist ♥", description: "Item added to your wishlist." });
+  }, [toast]);
 
-  const addToWishlistMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      if (!userId) throw new Error("User ID required");
-      const res = await fetch(`${api.wishlist.addItem.path}?userId=${userId}`, {
-        method: api.wishlist.addItem.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "Failed to add to wishlist" }));
-        throw new Error(err.message);
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.wishlist.get.path, userId] });
-      toast({
-        title: "Added to Wishlist",
-        description: "Item has been added to your wishlist.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Failed to Add to Wishlist",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const removeFromWishlist = useCallback((uid: number | undefined, productId: number) => {
+    setWishlistIds(prev => {
+      const next = prev.filter(id => id !== productId);
+      saveLocalWishlist(next);
+      return next;
+    });
+    toast({ title: "Removed from Wishlist", description: "Item removed from your wishlist." });
+  }, [toast]);
 
-  const removeFromWishlistMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      if (!userId) throw new Error("User ID required");
-      const res = await fetch(`${api.wishlist.removeItem.path.replace(':productId', String(productId))}?userId=${userId}`, {
-        method: api.wishlist.removeItem.method,
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "Failed to remove from wishlist" }));
-        throw new Error(err.message);
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [api.wishlist.get.path, userId] });
-      toast({
-        title: "Removed from Wishlist",
-        description: "Item has been removed from your wishlist.",
-      });
-    },
-  });
-
-  const checkWishlistMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      if (!userId) return false;
-      const res = await fetch(`${api.wishlist.check.path.replace(':productId', String(productId))}?userId=${userId}`);
-      if (!res.ok) return false;
-      const data = await res.json();
-      return data.isInWishlist;
-    },
-  });
+  // wishlist items are just IDs; pages that need full product data join against the products list
+  const wishlist = wishlistIds.map(id => ({ product: { id } }));
 
   return {
     wishlist,
-    isLoading,
-    addToWishlist: addToWishlistMutation.mutate,
-    removeFromWishlist: removeFromWishlistMutation.mutate,
-    checkWishlist: checkWishlistMutation.mutateAsync,
-    isAdding: addToWishlistMutation.isPending,
-    isRemoving: removeFromWishlistMutation.isPending,
+    wishlistIds,
+    isLoading: false,
+    addToWishlist,
+    removeFromWishlist,
+    isAdding: false,
+    isRemoving: false,
   };
 }

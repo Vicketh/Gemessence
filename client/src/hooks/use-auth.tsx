@@ -1,128 +1,153 @@
-import { createContext, useContext, ReactNode } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@shared/routes";
-import type { RegisterRequest, LoginRequest } from "@shared/schema";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { z } from "zod";
-import { apiUrl } from "@/lib/utils";
 
-type User = z.infer<typeof api.auth.me.responses[200]>;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  isVerified: boolean | null;
+  isAdmin: boolean | null;
+  isSuperUser: boolean | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  county: string | null;
+  createdAt: Date | null;
+}
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (data: LoginRequest) => void;
-  register: (data: RegisterRequest) => void;
+  login: (data: { username: string; password: string }) => void;
+  register: (data: { username: string; email: string; password: string }) => void;
   logout: () => void;
   isLoginPending: boolean;
   isRegisterPending: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const USER_KEY = "gem_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-
-  const { data: user, isLoading } = useQuery({
-    queryKey: [api.auth.me.path],
-    queryFn: async () => {
-      const res = await fetch(apiUrl(api.auth.me.path), { credentials: "include" });
-      if (res.status === 401) return null;
-      if (!res.ok) throw new Error("Failed to fetch user");
-      return api.auth.me.responses[200].parse(await res.json());
-    },
-    retry: false,
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem(USER_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
   });
+  const [isLoading] = useState(false);
+  const [isLoginPending, setIsLoginPending] = useState(false);
+  const [isRegisterPending, setIsRegisterPending] = useState(false);
 
-  const loginMutation = useMutation({
-    mutationFn: async (data: LoginRequest) => {
-      const res = await fetch(apiUrl(api.auth.login.path), {
-        method: api.auth.login.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-      
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "Login failed" }));
-        throw new Error(err.message || "Login failed");
+  const saveUser = (u: any): User => {
+    const mapped: User = {
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      isVerified: u.is_verified ?? u.isVerified ?? false,
+      isAdmin: u.is_admin ?? u.isAdmin ?? false,
+      isSuperUser: u.is_super_user ?? u.isSuperUser ?? false,
+      phone: u.phone ?? null,
+      address: u.address ?? null,
+      city: u.city ?? null,
+      county: u.county ?? null,
+      createdAt: u.created_at ? new Date(u.created_at) : (u.createdAt ? new Date(u.createdAt) : null),
+    };
+    setUser(mapped);
+    localStorage.setItem(USER_KEY, JSON.stringify(mapped));
+    return mapped;
+  };
+
+  const login = async (data: { username: string; password: string }) => {
+    setIsLoginPending(true);
+    try {
+      // Try Express backend first (handles bcrypt), fall back to Supabase direct
+      let u: any = null;
+      if (API_BASE) {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ message: "Invalid credentials" }));
+          throw new Error(err.message);
+        }
+        u = await res.json();
+      } else {
+        // Static/GitHub Pages mode — use Supabase
+        const { loginUser } = await import("@/lib/supabase");
+        u = await loginUser(data.username, data.password);
       }
-      return api.auth.login.responses[200].parse(await res.json());
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData([api.auth.me.path], data);
-      toast({ title: "Welcome back!", description: "Successfully logged in." });
-      setLocation("/dashboard");
-    },
-    onError: (error: Error) => {
-      toast({ title: "Login Failed", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const registerMutation = useMutation({
-    mutationFn: async (data: RegisterRequest) => {
-      const res = await fetch(apiUrl(api.auth.register.path), {
-        method: api.auth.register.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
-      
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "Registration failed" }));
-        throw new Error(err.message || "Registration failed");
+      const mapped = saveUser(u);
+      toast({ title: "Welcome back!", description: `Signed in as ${mapped.username}` });
+      if (mapped.isAdmin || mapped.isSuperUser) {
+        setLocation("/admin");
+      } else {
+        setLocation("/dashboard");
       }
-      return api.auth.register.responses[201].parse(await res.json());
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData([api.auth.me.path], data);
-      toast({ title: "Welcome to GemEssence", description: "Your account has been created." });
-      setLocation("/dashboard");
-    },
-    onError: (error: Error) => {
-      toast({ title: "Registration Failed", description: error.message, variant: "destructive" });
-    },
-  });
+    } catch (err: any) {
+      toast({ title: "Login Failed", description: err.message || "Invalid credentials", variant: "destructive" });
+    } finally {
+      setIsLoginPending(false);
+    }
+  };
 
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(apiUrl(api.auth.logout.path), {
-        method: api.auth.logout.method,
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Logout failed");
-    },
-    onSuccess: () => {
-      queryClient.setQueryData([api.auth.me.path], null);
-      toast({ title: "Logged out", description: "You have been securely logged out." });
-      setLocation("/");
-    },
-  });
+  const register = async (data: { username: string; email: string; password: string }) => {
+    setIsRegisterPending(true);
+    try {
+      let u: any = null;
+      if (API_BASE) {
+        const res = await fetch(`${API_BASE}/api/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ message: "Registration failed" }));
+          throw new Error(err.message);
+        }
+        u = await res.json();
+      } else {
+        const { registerUser } = await import("@/lib/supabase");
+        u = await registerUser(data.username, data.email, data.password);
+      }
+      saveUser(u);
+      toast({ title: "Welcome to Gemessence!", description: "Your account has been created." });
+      setLocation("/dashboard");
+    } catch (err: any) {
+      toast({ title: "Registration Failed", description: err.message || "Could not create account", variant: "destructive" });
+    } finally {
+      setIsRegisterPending(false);
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem(USER_KEY);
+    if (API_BASE) {
+      fetch(`${API_BASE}/api/auth/logout`, { method: "POST", credentials: "include" }).catch(() => {});
+    }
+    toast({ title: "Signed out", description: "You have been logged out." });
+    setLocation("/");
+  };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user: user || null,
-        isLoading,
-        login: loginMutation.mutate,
-        register: registerMutation.mutate,
-        logout: logoutMutation.mutate,
-        isLoginPending: loginMutation.isPending,
-        isRegisterPending: registerMutation.isPending,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout, isLoginPending, isRegisterPending }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 }

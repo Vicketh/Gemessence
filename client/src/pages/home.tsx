@@ -66,36 +66,33 @@ export default function Home() {
     ));
   };
 
-  // Chain product images for new products
-  const chainImages = [
-    `${BASE}/assets/Gem (1).png`,
-    `${BASE}/assets/Gem (2).png`,
-    `${BASE}/assets/Gem (3).png`,
-    `${BASE}/assets/Gem (4).png`,
-    `${BASE}/assets/Gem (5).png`,
-    `${BASE}/assets/Gem (6).png`,
-    `${BASE}/assets/Gem (7).png`,
-    `${BASE}/assets/Gem (8).png`,
-    `${BASE}/assets/Gem (9).png`,
-    `${BASE}/assets/Gem (10).png`,
-    `${BASE}/assets/Gem (11).png`,
-    `${BASE}/assets/Gem (12).png`,
-  ];
+  // New product images (from 'Gemessence new products' folder)
+  const newImgs = Array.from({ length: 12 }, (_, i) => `${BASE}/assets/new/Gem (${i + 1}).png`);
+  // Existing chain images
+  const chainImages = Array.from({ length: 12 }, (_, i) => `${BASE}/assets/Gem (${i + 1}).png`);
 
-  // Enhanced product data with chain images
+  // Enhanced product data — new products appear FIRST
   const enhancedProducts = (products && products.length > 0) ? products : [
+    // ── NEW ARRIVALS (appear first) ──
+    { id: 101, name: "Sovereign Curb Chain Necklace", slug: "sovereign-curb-chain-necklace", description: "Bold 18k gold curb-link chain with a weighty, polished finish — a statement of power and prestige", price: "185000.00", compareAtPrice: "220000.00", imageUrl: newImgs[0], images: [] as string[], categoryId: null, category: "Necklaces", featured: true, inStock: true, stockQuantity: 8, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: "22 inches", weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 102, name: "Empress Rope Bracelet", slug: "empress-rope-bracelet", description: "Twisted rope-design bracelet in 18k yellow gold — effortlessly elegant for day or evening wear", price: "95000.00", compareAtPrice: null, imageUrl: newImgs[1], images: [] as string[], categoryId: null, category: "Bracelets", featured: true, inStock: true, stockQuantity: 12, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 103, name: "Lumière Diamond Pendant", slug: "lumiere-diamond-pendant", description: "Brilliant-cut diamond solitaire pendant on a delicate 18k white gold chain — pure radiance", price: "245000.00", compareAtPrice: "285000.00", imageUrl: newImgs[2], images: [] as string[], categoryId: null, category: "Necklaces", featured: true, inStock: true, stockQuantity: 5, sku: null, metalType: "18k Gold", metalColor: "White", gemstoneType: "Diamond", gemstoneWeight: null, ringSizes: [] as string[], chainLength: "18 inches", weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 104, name: "Regal Figaro Chain", slug: "regal-figaro-chain", description: "Classic figaro-link chain in 18k gold — a timeless Kenyan favourite reimagined with modern polish", price: "135000.00", compareAtPrice: null, imageUrl: newImgs[3], images: [] as string[], categoryId: null, category: "Necklaces", featured: true, inStock: true, stockQuantity: 10, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: "20 inches", weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 105, name: "Auric Bangle Set", slug: "auric-bangle-set", description: "Set of three stackable 18k gold bangles — wear together for drama or alone for understated luxury", price: "155000.00", compareAtPrice: "180000.00", imageUrl: newImgs[4], images: [] as string[], categoryId: null, category: "Bracelets", featured: true, inStock: true, stockQuantity: 7, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 106, name: "Celestia Ruby Ring", slug: "celestia-ruby-ring", description: "Vivid Mozambique ruby flanked by pavé diamonds in 18k rose gold — passion captured in metal", price: "215000.00", compareAtPrice: null, imageUrl: newImgs[5], images: [] as string[], categoryId: null, category: "Rings", featured: true, inStock: true, stockQuantity: 4, sku: null, metalType: "18k Gold", metalColor: "Rose", gemstoneType: "Ruby", gemstoneWeight: null, ringSizes: ["5","6","7","8"] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 107, name: "Opulence Link Bracelet", slug: "opulence-link-bracelet", description: "Heavy-gauge rectangular link bracelet in 18k gold — bold, architectural, unmistakably luxurious", price: "175000.00", compareAtPrice: "205000.00", imageUrl: newImgs[6], images: [] as string[], categoryId: null, category: "Bracelets", featured: true, inStock: true, stockQuantity: 6, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 108, name: "Soleil Hoop Earrings", slug: "soleil-hoop-earrings", description: "Oversized 18k gold hoops with a brushed-satin finish — the perfect everyday luxury accessory", price: "85000.00", compareAtPrice: null, imageUrl: newImgs[7], images: [] as string[], categoryId: null, category: "Earrings", featured: true, inStock: true, stockQuantity: 15, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 109, name: "Prestige Tennis Necklace", slug: "prestige-tennis-necklace", description: "Continuous row of round brilliant diamonds set in 18k white gold — the ultimate red-carpet piece", price: "385000.00", compareAtPrice: "450000.00", imageUrl: newImgs[8], images: [] as string[], categoryId: null, category: "Necklaces", featured: true, inStock: true, stockQuantity: 3, sku: null, metalType: "18k Gold", metalColor: "White", gemstoneType: "Diamond", gemstoneWeight: null, ringSizes: [] as string[], chainLength: "16 inches", weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 110, name: "Verdant Emerald Pendant", slug: "verdant-emerald-pendant", description: "Pear-cut Colombian emerald pendant on an 18k yellow gold chain — vivid colour, timeless form", price: "195000.00", compareAtPrice: null, imageUrl: newImgs[9], images: [] as string[], categoryId: null, category: "Necklaces", featured: false, inStock: true, stockQuantity: 5, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: "Emerald", gemstoneWeight: null, ringSizes: [] as string[], chainLength: "18 inches", weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 111, name: "Monarch Sapphire Ring", slug: "monarch-sapphire-ring", description: "Royal blue sapphire in a classic four-claw platinum setting with diamond shoulders — regal and refined", price: "265000.00", compareAtPrice: "310000.00", imageUrl: newImgs[10], images: [] as string[], categoryId: null, category: "Rings", featured: false, inStock: true, stockQuantity: 4, sku: null, metalType: "Platinum", metalColor: "White", gemstoneType: "Sapphire", gemstoneWeight: null, ringSizes: ["5","6","7","8"] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    { id: 112, name: "Cascade Diamond Earrings", slug: "cascade-diamond-earrings", description: "Three-tier drop earrings with graduating diamonds in 18k white gold — movement, light, and glamour", price: "225000.00", compareAtPrice: null, imageUrl: newImgs[11], images: [] as string[], categoryId: null, category: "Earrings", featured: false, inStock: true, stockQuantity: 6, sku: null, metalType: "18k Gold", metalColor: "White", gemstoneType: "Diamond", gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
+    // ── EXISTING COLLECTION ──
     { id: 1, name: "Royal Gold Chain Necklace", slug: "royal-gold-chain-necklace", description: "Exquisite 18k gold chain with intricate link design, perfect for any occasion", price: "125000.00", compareAtPrice: "150000.00", imageUrl: chainImages[0], images: [] as string[], categoryId: null, category: "Necklaces", featured: true, inStock: true, stockQuantity: 10, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: "18 inches", weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
     { id: 2, name: "Luxury Chain Bracelet", slug: "luxury-chain-bracelet", description: "Premium gold bracelet with sophisticated craftsmanship and timeless appeal", price: "85000.00", compareAtPrice: null, imageUrl: chainImages[1], images: [] as string[], categoryId: null, category: "Bracelets", featured: true, inStock: true, stockQuantity: 10, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
     { id: 3, name: "Artisan Gold Chain Set", slug: "artisan-gold-chain-set", description: "Handcrafted chain jewelry set with royal elegance and master craftsmanship", price: "195000.00", compareAtPrice: "220000.00", imageUrl: chainImages[2], images: [] as string[], categoryId: null, category: "Sets", featured: true, inStock: true, stockQuantity: 5, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
     { id: 4, name: "Classic Chain Pendant", slug: "classic-chain-pendant", description: "Timeless gold chain with elegant pendant design for everyday luxury", price: "75000.00", compareAtPrice: null, imageUrl: chainImages[3], images: [] as string[], categoryId: null, category: "Necklaces", featured: true, inStock: true, stockQuantity: 15, sku: null, metalType: "18k Gold", metalColor: "Yellow", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
     { id: 5, name: "Regal Chain Collection", slug: "regal-chain-collection", description: "Sophisticated chain jewelry for special occasions and celebrations", price: "165000.00", compareAtPrice: null, imageUrl: chainImages[4], images: [] as string[], categoryId: null, category: "Rings", featured: true, inStock: true, stockQuantity: 8, sku: null, metalType: "18k Gold", metalColor: "Rose", gemstoneType: "Diamond", gemstoneWeight: null, ringSizes: ["6","7","8"] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
     { id: 6, name: "Master Craftsman Chain", slug: "master-craftsman-chain", description: "Premium artisan chain with exceptional detail and unmatched quality", price: "145000.00", compareAtPrice: "175000.00", imageUrl: chainImages[5], images: [] as string[], categoryId: null, category: "Necklaces", featured: true, inStock: true, stockQuantity: 12, sku: null, metalType: "18k Gold", metalColor: "White", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: "20 inches", weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
-    { id: 7, name: "Diamond Solitaire Ring", slug: "diamond-solitaire-ring", description: "Brilliant round-cut diamond set in 18k white gold — the ultimate symbol of love", price: "285000.00", compareAtPrice: null, imageUrl: chainImages[6], images: [] as string[], categoryId: null, category: "Rings", featured: true, inStock: true, stockQuantity: 4, sku: null, metalType: "18k Gold", metalColor: "White", gemstoneType: "Diamond", gemstoneWeight: null, ringSizes: ["5","6","7","8"] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
-    { id: 8, name: "Pearl Drop Earrings", slug: "pearl-drop-earrings", description: "Elegant freshwater pearl drop earrings set in sterling silver for refined grace", price: "45000.00", compareAtPrice: null, imageUrl: chainImages[7], images: [] as string[], categoryId: null, category: "Earrings", featured: false, inStock: true, stockQuantity: 20, sku: null, metalType: "Sterling Silver", metalColor: "White", gemstoneType: "Pearl", gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
-    { id: 9, name: "Gold Tennis Bracelet", slug: "gold-tennis-bracelet", description: "Stunning tennis bracelet featuring genuine gemstones set in 14k gold", price: "95000.00", compareAtPrice: "115000.00", imageUrl: chainImages[8], images: [] as string[], categoryId: null, category: "Bracelets", featured: false, inStock: true, stockQuantity: 7, sku: null, metalType: "14k Gold", metalColor: "Yellow", gemstoneType: "Ruby", gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
-    { id: 10, name: "Sapphire Halo Ring", slug: "sapphire-halo-ring", description: "Magnificent blue sapphire surrounded by a halo of diamonds in platinum", price: "175000.00", compareAtPrice: null, imageUrl: chainImages[9], images: [] as string[], categoryId: null, category: "Rings", featured: false, inStock: true, stockQuantity: 3, sku: null, metalType: "Platinum", metalColor: "White", gemstoneType: "Sapphire", gemstoneWeight: null, ringSizes: ["5","6","7"] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
-    { id: 11, name: "Rose Gold Bangle", slug: "rose-gold-bangle", description: "Delicate rose gold bangle with intricate floral engravings — feminine and timeless", price: "65000.00", compareAtPrice: null, imageUrl: chainImages[10], images: [] as string[], categoryId: null, category: "Bracelets", featured: false, inStock: true, stockQuantity: 14, sku: null, metalType: "18k Gold", metalColor: "Rose", gemstoneType: null, gemstoneWeight: null, ringSizes: [] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
-    { id: 12, name: "Emerald Cut Diamond Ring", slug: "emerald-cut-diamond-ring", description: "Sophisticated emerald-cut diamond with baguette side stones in 18k white gold", price: "225000.00", compareAtPrice: "260000.00", imageUrl: chainImages[11], images: [] as string[], categoryId: null, category: "Rings", featured: false, inStock: true, stockQuantity: 2, sku: null, metalType: "18k Gold", metalColor: "White", gemstoneType: "Diamond", gemstoneWeight: null, ringSizes: ["5","6","7","8","9"] as string[], chainLength: null, weight: null, dimensions: null, createdAt: new Date(), updatedAt: new Date() },
   ] as Product[];
 
   return (
@@ -182,10 +179,11 @@ export default function Home() {
               <h2 className="font-display text-4xl md:text-5xl font-bold">
                 Featured Pieces
               </h2>
+              <p className="text-muted-foreground mt-2 text-sm">New arrivals shown first</p>
             </div>
-            <button className="text-primary font-semibold flex items-center gap-2 hover:gap-4 transition-all">
+            <Link href="/#collections" className="text-primary font-semibold flex items-center gap-2 hover:gap-4 transition-all">
               View All <ChevronRight className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
@@ -276,19 +274,34 @@ export default function Home() {
                   </a>
                 </li>
                 <li>
-                  <span className="hover:text-primary transition-colors cursor-pointer">
-                    Shipping & Returns
-                  </span>
+                  <a
+                    href={`https://wa.me/${encodeURIComponent("+254797534189")}?text=${encodeURIComponent("Hi, I have a question about shipping and returns.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
+                    Shipping &amp; Returns
+                  </a>
                 </li>
                 <li>
-                  <span className="hover:text-primary transition-colors cursor-pointer">
+                  <a
+                    href={`https://wa.me/${encodeURIComponent("+254797534189")}?text=${encodeURIComponent("Hi, I need jewelry care advice.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
                     Care Guide
-                  </span>
+                  </a>
                 </li>
                 <li>
-                  <span className="hover:text-primary transition-colors cursor-pointer">
+                  <a
+                    href={`https://wa.me/${encodeURIComponent("+254797534189")}?text=${encodeURIComponent("Hi, I have a question.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
                     FAQ
-                  </span>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -298,12 +311,22 @@ export default function Home() {
               &copy; {new Date().getFullYear()} Gemessence. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <span className="hover:text-white transition-colors cursor-pointer">
+              <a
+                href={`https://wa.me/${encodeURIComponent("+254797534189")}?text=${encodeURIComponent("Hi, I have a privacy question.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
                 Privacy Policy
-              </span>
-              <span className="hover:text-white transition-colors cursor-pointer">
+              </a>
+              <a
+                href={`https://wa.me/${encodeURIComponent("+254797534189")}?text=${encodeURIComponent("Hi, I have a question about your terms.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
                 Terms of Service
-              </span>
+              </a>
             </div>
           </div>
         </div>

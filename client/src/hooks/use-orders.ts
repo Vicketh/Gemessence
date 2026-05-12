@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl } from "@shared/routes";
+import { api } from "@shared/routes";
 import { useToast } from "./use-toast";
+import { getOrders, getOrder as getOrderSupabase, createOrder as createOrderSupabase } from "@/lib/supabase";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
 export interface CheckoutData {
   shippingFirstName: string;
@@ -22,61 +25,55 @@ export function useOrders(userId?: number) {
   const { toast } = useToast();
 
   const { data: orders, isLoading } = useQuery({
-    queryKey: [api.orders.list.path, userId],
+    queryKey: ["orders", userId],
     queryFn: async () => {
       if (!userId) return [];
-      const res = await fetch(`${api.orders.list.path}?userId=${userId}`);
-      if (!res.ok) return [];
-      return res.json();
+      if (API_BASE) {
+        const res = await fetch(`${API_BASE}${api.orders.list.path}?userId=${userId}`, { credentials: "include" });
+        if (!res.ok) return [];
+        return res.json();
+      }
+      return getOrders(userId);
     },
     enabled: !!userId,
   });
 
-  const getOrderQuery = useQuery({
-    queryKey: [api.orders.get.path],
-    queryFn: async () => {
-      return null;
-    },
-    enabled: false,
-  });
-
   const createOrderMutation = useMutation({
     mutationFn: async ({ checkoutData, sessionId, userId }: { checkoutData: CheckoutData; sessionId: string; userId?: number }) => {
-      const params = new URLSearchParams();
-      params.set("sessionId", sessionId);
-      if (userId) params.set("userId", String(userId));
-      const res = await fetch(`${api.orders.create.path}?${params.toString()}`, {
-        method: api.orders.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(checkoutData),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "Failed to create order" }));
-        throw new Error(err.message);
+      if (API_BASE) {
+        const params = new URLSearchParams();
+        params.set("sessionId", sessionId);
+        if (userId) params.set("userId", String(userId));
+        const res = await fetch(`${API_BASE}${api.orders.create.path}?${params.toString()}`, {
+          method: api.orders.create.method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(checkoutData),
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ message: "Failed to create order" }));
+          throw new Error(err.message);
+        }
+        return res.json();
       }
-      return res.json();
+      // Supabase fallback
+      return createOrderSupabase({ ...checkoutData, user_id: userId || null });
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [api.orders.list.path] });
-      queryClient.invalidateQueries({ queryKey: [api.cart.get.path] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast({
         title: "Order Placed Successfully!",
-        description: `Your order number is ${data.orderNumber}. Check your email for confirmation.`,
+        description: `Your order number is ${data.orderNumber || data.order_number}. Check your email for confirmation.`,
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Order Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Order Failed", description: error.message, variant: "destructive" });
     },
   });
 
   return {
     orders,
     isLoading,
-    getOrder: getOrderQuery.refetch,
     createOrder: createOrderMutation.mutateAsync,
     isCreating: createOrderMutation.isPending,
   };
@@ -84,41 +81,31 @@ export function useOrders(userId?: number) {
 
 export function useOrder(orderId?: number) {
   return useQuery({
-    queryKey: [api.orders.get.path, orderId],
+    queryKey: ["order", orderId],
     queryFn: async () => {
       if (!orderId) return null;
-      const res = await fetch(`${api.orders.get.path.replace(':id', String(orderId))}`);
-      if (!res.ok) return null;
-      return res.json();
+      if (API_BASE) {
+        const res = await fetch(`${API_BASE}${api.orders.get.path.replace(":id", String(orderId))}`, { credentials: "include" });
+        if (!res.ok) return null;
+        return res.json();
+      }
+      return getOrderSupabase(orderId);
     },
     enabled: !!orderId,
   });
 }
 
-export function useConfig() {
-  return useQuery({
-    queryKey: ["config"],
-    queryFn: async () => {
-      const [counties, metalTypes, gemstoneTypes, ringSizes, chainLengths] = await Promise.all([
-        fetch(api.config.counties.path).then(res => res.json()),
-        fetch(api.config.metalTypes.path).then(res => res.json()),
-        fetch(api.config.gemstoneTypes.path).then(res => res.json()),
-        fetch(api.config.ringSizes.path).then(res => res.json()),
-        fetch(api.config.chainLengths.path).then(res => res.json()),
-      ]);
-      return { counties, metalTypes, gemstoneTypes, ringSizes, chainLengths };
-    },
-  });
-}
-
 export function useShippingCost(county?: string) {
   return useQuery({
-    queryKey: [api.shipping.cost.path, county],
+    queryKey: ["shipping", county],
     queryFn: async () => {
-      if (!county) return { cost: 0, county: "" };
-      const res = await fetch(api.shipping.cost.path.replace(':county', county));
-      if (!res.ok) return { cost: 500, county };
-      return res.json();
+      if (!county) return { cost: 500, county: "" };
+      if (API_BASE) {
+        const res = await fetch(`${API_BASE}${api.shipping.cost.path.replace(":county", county)}`);
+        if (!res.ok) return { cost: 500, county };
+        return res.json();
+      }
+      return { cost: 500, county };
     },
     enabled: !!county,
   });
