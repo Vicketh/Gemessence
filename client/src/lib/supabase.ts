@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { resolveImageUrl } from "@/lib/utils";
+import { localProducts } from "@/data/products";
 
 // These are set as Vite env vars (VITE_ prefix = exposed to browser)
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -51,25 +52,32 @@ export async function getProducts(filters?: {
   featured?: boolean;
   search?: string;
 }) {
-  let query = supabase.from("products").select("*").order("created_at", { ascending: false });
-  if (filters?.category) query = query.eq("category", filters.category);
-  if (filters?.featured) query = query.eq("featured", true);
-  if (filters?.search) query = query.ilike("name", `%${filters.search}%`);
-  const { data, error } = await query;
-  if (error) {
-    console.warn("Failed to fetch products from Supabase:", error);
-    return [];
+  let products = [...localProducts];
+  if (filters?.category) {
+    products = products.filter((product) => product.category === filters.category);
   }
-  return (data ?? []).map(normalizeProduct);
+  if (filters?.featured) {
+    products = products.filter((product) => product.featured === true);
+  }
+  if (filters?.search) {
+    const search = filters.search.toLowerCase();
+    products = products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(search) ||
+        product.description.toLowerCase().includes(search),
+    );
+  }
+  return products.sort((a, b) => {
+    if (a.featured === b.featured) {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    return Number(b.featured) - Number(a.featured);
+  });
 }
 
 export async function getProduct(id: number) {
-  const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
-  if (error) {
-    console.warn("Failed to fetch product from Supabase:", error);
-    return null;
-  }
-  return normalizeProduct(data);
+  const product = localProducts.find((item) => item.id === id);
+  return normalizeProduct(product ?? null);
 }
 
 export async function createProduct(product: any) {
