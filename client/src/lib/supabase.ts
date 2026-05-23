@@ -69,7 +69,7 @@ export async function getProducts(filters?: {
   }
   return products.sort((a, b) => {
     if (a.featured === b.featured) {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
     }
     return Number(b.featured) - Number(a.featured);
   });
@@ -148,8 +148,22 @@ export async function loginUser(username: string, password: string) {
   return data;
 }
 
-export async function registerUser(username: string, email: string, password: string) {
-  const { data, error } = await supabase.from("users").insert({ username, email, password, is_verified: false, is_admin: false, is_super_user: false }).select().single();
+export async function registerUser(user: { username: string; fullName: string; email: string; phone: string; password: string }) {
+  const { data, error } = await supabase
+    .from("users")
+    .insert({
+      username: user.username,
+      full_name: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      password: user.password,
+      role: "customer",
+      is_verified: false,
+      is_admin: false,
+      is_super_user: false,
+    })
+    .select()
+    .single();
   if (error) throw error;
   return data;
 }

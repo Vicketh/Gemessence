@@ -9,6 +9,7 @@ import { CurrencyProvider } from "@/hooks/use-currency";
 import { CartProvider } from "@/hooks/use-cart-context";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import ShopPage from "@/pages/shop";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import CartPage from "@/pages/cart";
@@ -26,6 +27,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/shop" component={ShopPage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/cart" component={CartPage} />

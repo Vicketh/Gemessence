@@ -25,7 +25,9 @@ import {
 const userResponseSchema = z.object({
   id: z.number(),
   username: z.string(),
+  fullName: z.string().nullable().optional(),
   email: z.string(),
+  role: z.string().optional(),
   isVerified: z.boolean().nullable(),
   isAdmin: z.boolean().nullable(),
   isSuperUser: z.boolean().nullable(),

@@ -51,6 +51,25 @@ const metalTypes = ["14k Gold", "18k Gold", "Sterling Silver", "Platinum", "Rose
 const metalColors = ["Yellow", "White", "Rose"];
 const gemstoneTypes = ["Diamond", "Ruby", "Sapphire", "Emerald", "Pearl", "Amethyst"];
 
+function toAdminProduct(product: any): Product {
+  return {
+    ...product,
+    compareAtPrice: product.compareAtPrice ?? "",
+    images: product.images ?? [],
+    featured: product.featured ?? false,
+    inStock: product.inStock ?? true,
+    stockQuantity: product.stockQuantity ?? 0,
+    sku: product.sku ?? "",
+    metalType: product.metalType ?? "",
+    metalColor: product.metalColor ?? "",
+    gemstoneType: product.gemstoneType ?? "",
+    gemstoneWeight: product.gemstoneWeight ?? "",
+    ringSizes: product.ringSizes ?? [],
+    chainLength: product.chainLength ?? "",
+    weight: product.weight ?? "",
+  };
+}
+
 export function AdminProductManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -59,7 +78,7 @@ export function AdminProductManager() {
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["products"],
-    queryFn: () => getProducts(),
+    queryFn: async () => (await getProducts()).map(toAdminProduct),
   });
 
   const createMutation = useMutation({
@@ -115,8 +134,9 @@ export function AdminProductManager() {
   const handleDeleteProduct = (id: number) => deleteMutation.mutate(id);
 
   const handleEditProduct = (product: Product) => {
-    setFormData(product);
-    setEditingProduct(product);
+    const normalized = toAdminProduct(product);
+    setFormData(normalized);
+    setEditingProduct(normalized);
   };
 
   const resetForm = () => {

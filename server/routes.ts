@@ -117,8 +117,11 @@ async function seedDatabase() {
     const hashedPassword = await bcrypt.hash(adminPassword, 12);
     await storage.createUser({
       username: "admin",
+      fullName: "Gemessence Admin",
       email: process.env.ADMIN_EMAIL || "admin@gemessence.co.ke",
       password: hashedPassword,
+      role: "admin",
+      permissions: ["manage_products", "manage_orders", "manage_discounts", "message_customers"],
     } as any);
     console.log("Admin user created");
   }
@@ -133,8 +136,11 @@ async function seedDatabase() {
     const hashedSuperPassword = await bcrypt.hash(superPassword, 12);
     await storage.createUser({
       username: "superuser",
+      fullName: "Gemessence Superuser",
       email: "superuser@gemessence.co.ke",
       password: hashedSuperPassword,
+      role: "superuser",
+      permissions: ["manage_users", "manage_products", "manage_orders", "manage_discounts", "message_customers", "manage_settings"],
     } as any);
     // Set superuser flags directly
     const su = await storage.getUserByUsername("superuser");
@@ -146,6 +152,21 @@ async function seedDatabase() {
   const existingCategories = await storage.getCategories();
   if (existingCategories.length === 0) {
     const categories = [
+      {
+        name: "Gold",
+        slug: "gold",
+        description: "Gold jewelry and artifacts",
+      },
+      {
+        name: "Silver",
+        slug: "silver",
+        description: "Sterling silver jewelry and artifacts",
+      },
+      {
+        name: "Diamond",
+        slug: "diamond",
+        description: "Diamond-led jewelry and occasion pieces",
+      },
       {
         name: "Rings",
         slug: "rings",
@@ -1605,7 +1626,9 @@ export async function registerRoutes(
       res.status(201).json({
         id: user.id,
         username: user.username,
+        fullName: (user as any).fullName ?? null,
         email: user.email,
+        role: (user as any).role ?? "customer",
         isVerified: user.isVerified,
         isAdmin: user.isAdmin,
         isSuperUser: (user as any).isSuperUser ?? false,
@@ -1649,7 +1672,9 @@ export async function registerRoutes(
       res.status(200).json({
         id: user.id,
         username: user.username,
+        fullName: (user as any).fullName ?? null,
         email: user.email,
+        role: (user as any).role ?? "customer",
         isVerified: user.isVerified,
         isAdmin: user.isAdmin,
         isSuperUser: (user as any).isSuperUser ?? false,
@@ -1685,7 +1710,9 @@ export async function registerRoutes(
       res.status(200).json({
         id: user.id,
         username: user.username,
+        fullName: (user as any).fullName ?? null,
         email: user.email,
+        role: (user as any).role ?? "customer",
         isVerified: user.isVerified,
         isAdmin: user.isAdmin,
         isSuperUser: (user as any).isSuperUser ?? false,

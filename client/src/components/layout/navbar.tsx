@@ -6,10 +6,63 @@ import { useAuth } from "@/hooks/use-auth";
 import { GemessenceLogo } from "@/components/ui/gemessence-logo";
 import { CartDrawer } from "@/components/ui/cart-drawer";
 import { useCartContext } from "@/hooks/use-cart-context";
-import { LogOut, User, Menu, X, ShoppingCart, Heart, Package, Shield } from "lucide-react";
-import { useState, useEffect } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  Shield,
+  ShoppingCart,
+  User,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+
+const navGroups = [
+  {
+    label: "Gold",
+    href: "/shop#gold",
+    links: [
+      { label: "Gold necklaces", href: "/shop#necklaces" },
+      { label: "Gold bracelets", href: "/shop#bracelets" },
+      { label: "Gold bangles", href: "/shop#artifacts" },
+    ],
+  },
+  {
+    label: "Silver",
+    href: "/shop#silver",
+    links: [
+      { label: "Silver rings", href: "/shop#silver" },
+      { label: "Silver earrings", href: "/shop#earrings" },
+    ],
+  },
+  {
+    label: "Diamond",
+    href: "/shop#diamond",
+    links: [
+      { label: "Diamond rings", href: "/shop#diamond" },
+      { label: "Diamond pendants", href: "/shop#necklaces" },
+    ],
+  },
+  {
+    label: "Artifacts",
+    href: "/shop#artifacts",
+    links: [
+      { label: "Statement sets", href: "/shop#artifacts" },
+      { label: "Bracelets & bangles", href: "/shop#bracelets" },
+    ],
+  },
+];
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -19,136 +72,167 @@ export function Navbar() {
   const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 20);
+    const onScroll = () => setIsScrolled(window.scrollY > 16);
     window.addEventListener("scroll", onScroll);
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Collections", href: "/#collections" },
-    { label: "About", href: "/#about" },
-    { label: "Contact", href: "/#contact" },
-  ];
-
   return (
     <>
-      <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? "glass-panel shadow-lg" : "bg-transparent"}`}>
-        {/* Main row */}
-        <div className="container mx-auto px-4 md:px-6 flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center group flex-shrink-0 py-2">
-            <GemessenceLogo height={56} className="group-hover:opacity-90 transition-opacity" />
-          </Link>
+      <header
+        className={`fixed inset-x-0 top-0 z-50 border-b border-border transition ${
+          isScrolled ? "bg-background/92 shadow-sm backdrop-blur-xl" : "bg-background/82 backdrop-blur"
+        }`}
+      >
+        <div className="border-b border-border/70 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+          Gemessence, jewellers of distinction since 2000
+        </div>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8 font-medium text-sm">
-            {navLinks.map(l => (
-              <Link key={l.href} href={l.href} className="hover:text-primary transition-colors duration-200 relative group">
-                {l.label}
-                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300" />
-              </Link>
+        <div className="mx-auto grid h-20 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 md:px-8">
+          <nav className="hidden items-center gap-7 md:flex">
+            {navGroups.slice(0, 2).map((group) => (
+              <NavGroup key={group.label} group={group} />
             ))}
-            {(user as any)?.isAdmin && (
-              <Link href="/admin" className="text-primary font-semibold flex items-center gap-1 hover:text-primary/80 transition-colors">
-                <Shield className="h-3.5 w-3.5" /> Admin
-              </Link>
-            )}
+            <Link href="/shop#collections" className="text-sm font-medium hover:text-primary">
+              Shop
+            </Link>
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1 md:gap-2">
+          <Link href="/" className="flex items-center justify-center">
+            <GemessenceLogo height={54} />
+          </Link>
+
+          <div className="flex items-center justify-end gap-1 md:gap-2">
+            <nav className="mr-4 hidden items-center gap-7 md:flex">
+              {navGroups.slice(2).map((group) => (
+                <NavGroup key={group.label} group={group} />
+              ))}
+              <a href="/#contact" className="text-sm font-medium hover:text-primary">
+                Contact
+              </a>
+            </nav>
+
             <CurrencyToggle />
             <ThemeToggle />
 
-            {/* Cart */}
-            <Button variant="ghost" size="icon" className="relative" onClick={() => setCartOpen(true)}>
-              <ShoppingCart className="w-5 h-5" />
+            <Button variant="ghost" size="icon" className="relative rounded-sm" onClick={() => setCartOpen(true)} aria-label="Open cart">
+              <ShoppingCart className="h-5 w-5" />
               {totalItems > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-bounce">
+                <Badge className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-[10px]">
                   {totalItems > 9 ? "9+" : totalItems}
                 </Badge>
               )}
             </Button>
 
             {user ? (
-              <>
-                <Link href="/wishlist">
-                  <Button variant="ghost" size="icon" className="hidden md:flex"><Heart className="w-5 h-5" /></Button>
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="hidden md:flex items-center gap-2 hover:bg-primary/10 hover:text-primary rounded-full px-3">
-                      <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
-                        {user.username.slice(0, 1).toUpperCase()}
-                      </div>
-                      <span className="text-sm font-medium">{user.username}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild><Link href="/dashboard" className="cursor-pointer flex items-center"><User className="w-4 h-4 mr-2" />Profile</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link href="/orders" className="cursor-pointer flex items-center"><Package className="w-4 h-4 mr-2" />Orders</Link></DropdownMenuItem>
-                    <DropdownMenuItem asChild><Link href="/wishlist" className="cursor-pointer flex items-center"><Heart className="w-4 h-4 mr-2" />Wishlist</Link></DropdownMenuItem>
-                    {(user as any)?.isAdmin && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild><Link href="/admin" className="cursor-pointer flex items-center text-primary"><Shield className="w-4 h-4 mr-2" />Admin Panel</Link></DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => logout()} className="cursor-pointer text-destructive"><LogOut className="w-4 h-4 mr-2" />Sign Out</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button variant="outline" onClick={() => logout()} className="md:hidden border-primary/50 h-8 w-8 p-0 rounded-full">
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="hidden h-9 items-center gap-2 rounded-sm px-2 md:flex">
+                    <User className="h-4 w-4" />
+                    <span className="max-w-24 truncate text-sm">{user.username}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="cursor-pointer"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/orders" className="cursor-pointer"><Package className="mr-2 h-4 w-4" />Orders</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/wishlist" className="cursor-pointer"><Heart className="mr-2 h-4 w-4" />Wishlist</Link>
+                  </DropdownMenuItem>
+                  {(user as any)?.isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin" className="cursor-pointer text-primary"><Shield className="mr-2 h-4 w-4" />Admin Panel</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logout()} className="cursor-pointer text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <Link href="/auth">
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gold-glow-hover rounded-full px-5 h-9 text-sm font-semibold">
-                  Sign In
+              <Link href="/auth" className="hidden md:block">
+                <Button variant="outline" className="h-9 rounded-sm px-4 text-sm">
+                  Log in
                 </Button>
               </Link>
             )}
 
-            {/* Mobile hamburger */}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {(user as any)?.isAdmin && (
+              <Link href="/admin" className="hidden md:block">
+                <Button className="h-9 rounded-sm px-4 text-sm">
+                  Dashboard
+                </Button>
+              </Link>
+            )}
+
+            <Button variant="ghost" size="icon" className="rounded-sm md:hidden" onClick={() => setMobileOpen((open) => !open)} aria-label="Open menu">
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
-        {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-card/95 backdrop-blur-xl border-b border-border shadow-xl">
-            <nav className="flex flex-col p-5 space-y-1">
-              {navLinks.map(l => (
-                <Link key={l.href} href={l.href} className="py-2.5 px-3 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors font-medium" onClick={() => setMobileOpen(false)}>
-                  {l.label}
+          <div className="border-t border-border bg-background/98 px-4 py-4 shadow-lg backdrop-blur-xl md:hidden">
+            <nav className="grid gap-1">
+              {[...navGroups, { label: "Shop", href: "/shop#collections", links: [] }, { label: "Contact", href: "/#contact", links: [] }].map((group) => (
+                <Link
+                  key={group.label}
+                  href={group.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-sm px-3 py-2.5 text-sm font-medium hover:bg-muted hover:text-primary"
+                >
+                  {group.label}
                 </Link>
               ))}
-              {user && (
-                <>
-                  <div className="border-t border-border my-2" />
-                  <Link href="/orders" className="py-2.5 px-3 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>Orders</Link>
-                  <Link href="/wishlist" className="py-2.5 px-3 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>Wishlist</Link>
-                  <Link href="/dashboard" className="py-2.5 px-3 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setMobileOpen(false)}>Account</Link>
-                  {(user as any)?.isAdmin && (
-                    <Link href="/admin" className="py-2.5 px-3 rounded-lg text-primary font-semibold flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                      <Shield className="h-4 w-4" /> Admin Panel
-                    </Link>
-                  )}
-                </>
+              <div className="my-2 border-t border-border" />
+              <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="rounded-sm px-3 py-2.5 text-sm font-medium hover:bg-muted">
+                Dashboard
+              </Link>
+              {user ? (
+                <button onClick={() => { logout(); setMobileOpen(false); }} className="rounded-sm px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted">
+                  Sign out
+                </button>
+              ) : (
+                <Link href="/auth" onClick={() => setMobileOpen(false)} className="rounded-sm px-3 py-2.5 text-sm font-medium hover:bg-muted">
+                  Log in
+                </Link>
               )}
             </nav>
           </div>
         )}
       </header>
 
-      {/* Cart Drawer */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
+  );
+}
+
+function NavGroup({ group }: { group: { label: string; href: string; links: { label: string; href: string }[] } }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Link href={group.href} className="text-sm font-medium hover:text-primary">
+          {group.label}
+        </Link>
+      </DropdownMenuTrigger>
+      {group.links.length > 0 && (
+        <DropdownMenuContent align="start" className="w-52">
+          {group.links.map((link) => (
+            <DropdownMenuItem key={link.label} asChild>
+              <Link href={link.href} className="cursor-pointer">
+                {link.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      )}
+    </DropdownMenu>
   );
 }

@@ -18,11 +18,15 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  fullName: text("full_name"),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").notNull().default("customer"),
   isVerified: boolean("is_verified").default(false),
   isAdmin: boolean("is_admin").default(false),
   isSuperUser: boolean("is_super_user").default(false),
+  permissions: jsonb("permissions").$type<string[]>().default([]),
+  createdBy: integer("created_by").references((): AnyPgColumn => users.id),
   phone: text("phone"),
   address: text("address"),
   city: text("city"),
@@ -331,8 +335,12 @@ export const productDiscounts = pgTable("product_discounts", {
 // ============================================
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
+  fullName: true,
   email: true,
   password: true,
+  role: true,
+  permissions: true,
+  createdBy: true,
   phone: true,
   address: true,
   city: true,

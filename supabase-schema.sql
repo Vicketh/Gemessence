@@ -7,17 +7,26 @@
 create table if not exists users (
   id bigserial primary key,
   username text not null unique,
+  full_name text,
   email text not null unique,
   password text not null,
+  role text not null default 'customer',
   is_verified boolean default false,
   is_admin boolean default false,
   is_super_user boolean default false,
+  permissions jsonb default '[]',
+  created_by bigint references users(id),
   phone text,
   address text,
   city text,
   county text,
   created_at timestamptz default now()
 );
+
+alter table users add column if not exists full_name text;
+alter table users add column if not exists role text not null default 'customer';
+alter table users add column if not exists permissions jsonb default '[]';
+alter table users add column if not exists created_by bigint references users(id);
 
 -- APP SETTINGS (key-value store)
 create table if not exists app_settings (
@@ -165,6 +174,13 @@ insert into users (username, email, password, is_admin, is_super_user, is_verifi
 values ('superuser', 'superuser@gemessence.co.ke', 'GemSuper@2025!', true, true, true)
 on conflict (username) do nothing;
 
+update users
+set
+  full_name = coalesce(full_name, 'Gemessence Superuser'),
+  role = 'superuser',
+  permissions = '["manage_users","manage_products","manage_orders","manage_discounts","message_customers","manage_settings"]'
+where username = 'superuser';
+
 -- Default settings
 insert into app_settings (key, value) values
   ('whatsapp_number', '+254797534189'),
@@ -177,6 +193,9 @@ on conflict (key) do nothing;
 
 -- Categories
 insert into categories (name, slug, description) values
+  ('Gold', 'gold', 'Gold jewelry and artifacts'),
+  ('Silver', 'silver', 'Sterling silver jewelry and artifacts'),
+  ('Diamond', 'diamond', 'Diamond-led jewelry and occasion pieces'),
   ('Rings', 'rings', 'Exquisite rings for every occasion'),
   ('Necklaces', 'necklaces', 'Stunning necklaces and pendants'),
   ('Earrings', 'earrings', 'Elegant earrings for all styles'),

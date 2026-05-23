@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gem, ArrowRight, Mail, Lock, User } from "lucide-react";
+import { Gem, ArrowRight, Mail, Lock, User, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -31,8 +31,9 @@ const loginSchema = z.object({
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  fullName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email"),
+  phone: z.string().min(7, "Please enter a valid phone number"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -66,7 +67,7 @@ export default function AuthPage() {
 
   const registerForm = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { username: "", email: "", password: "" },
+    defaultValues: { fullName: "", email: "", phone: "", password: "" },
   });
 
   const onSubmitLogin = (data: z.infer<typeof loginSchema>) => {
@@ -159,7 +160,7 @@ export default function AuthPage() {
           </span>
         </div>
 
-        <div className="w-full max-w-md bg-card p-8 sm:p-10 rounded-3xl border border-border/50 shadow-2xl shadow-black/5 dark:shadow-black/40 relative overflow-hidden">
+        <div className="w-full max-w-md bg-card p-8 sm:p-10 rounded-sm border border-border/50 shadow-2xl shadow-black/5 dark:shadow-black/40 relative overflow-hidden">
           {/* Subtle gold accent border at top */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
@@ -199,7 +200,7 @@ export default function AuthPage() {
                               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                               <Input
                                 placeholder="admin"
-                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
+                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-sm"
                                 {...field}
                               />
                             </div>
@@ -230,7 +231,7 @@ export default function AuthPage() {
                               <Input
                                 type="password"
                                 placeholder="••••••••"
-                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
+                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-sm"
                                 {...field}
                               />
                             </div>
@@ -241,7 +242,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gold-glow-hover rounded-xl mt-4"
+                      className="w-full h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gold-glow-hover rounded-sm mt-4"
                       disabled={isLoginPending}
                     >
                       {isLoginPending ? "Authenticating..." : "Sign In"}
@@ -286,18 +287,18 @@ export default function AuthPage() {
                   >
                     <FormField
                       control={registerForm.control}
-                      name="username"
+                      name="fullName"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-foreground/80 uppercase text-xs tracking-wider">
-                            Username
+                            Name
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
                               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                               <Input
-                                placeholder="johndoe"
-                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
+                                placeholder="Jane Doe"
+                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-sm"
                                 {...field}
                               />
                             </div>
@@ -319,7 +320,29 @@ export default function AuthPage() {
                               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                               <Input
                                 placeholder="name@example.com"
-                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
+                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-sm"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80 uppercase text-xs tracking-wider">
+                            Phone number
+                          </FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input
+                                placeholder="+254..."
+                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-sm"
                                 {...field}
                               />
                             </div>
@@ -342,7 +365,7 @@ export default function AuthPage() {
                               <Input
                                 type="password"
                                 placeholder="••••••••"
-                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
+                                className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20 transition-all rounded-sm"
                                 {...field}
                               />
                             </div>
@@ -353,7 +376,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gold-glow-hover rounded-xl mt-4"
+                      className="w-full h-12 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 gold-glow-hover rounded-sm mt-4"
                       disabled={isRegisterPending}
                     >
                       {isRegisterPending ? "Creating..." : "Create Account"}

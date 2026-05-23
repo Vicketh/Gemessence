@@ -52,14 +52,14 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
     addItem({ id: product.id, name: product.name, price, imageUrl: product.imageUrl, category: product.category, slug: product.slug });
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 2000);
-    toast({ title: "Added to cart ✓", description: product.name });
+    toast({ title: "Added to cart", description: product.name });
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsWishlisted(!isWishlisted);
-    toast({ title: isWishlisted ? "Removed from wishlist" : "Saved to wishlist ♥", description: product.name });
+    toast({ title: isWishlisted ? "Removed from wishlist" : "Saved to wishlist", description: product.name });
   };
 
   const handleQuickView = (e: React.MouseEvent) => {
@@ -70,7 +70,7 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
 
   return (
     <motion.div
-      className="group relative bg-card rounded-2xl overflow-hidden shadow-md border border-border/50 hover:border-primary/40 hover:shadow-xl transition-all duration-300"
+      className="group relative overflow-hidden rounded-sm border border-border bg-card shadow-sm transition-all duration-300 hover:border-primary/50 hover:shadow-md"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       whileHover={{ y: -6 }}
@@ -98,17 +98,17 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
 
           {/* Top-left badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
-            <Badge className="bg-primary/90 text-primary-foreground text-xs font-semibold shadow">
+            <Badge className="rounded-sm bg-primary/90 text-xs font-semibold text-primary-foreground shadow">
               {product.category}
             </Badge>
             {discount && (
-              <Badge className="bg-secondary text-secondary-foreground text-xs font-bold shadow">
+              <Badge className="rounded-sm bg-secondary text-xs font-bold text-secondary-foreground shadow">
                 -{discount}%
               </Badge>
             )}
             {product.featured && (
-              <Badge className="bg-black/70 text-white text-xs border border-primary/50 shadow">
-                ✦ Featured
+              <Badge className="rounded-sm border border-primary/50 bg-black/70 text-xs text-white shadow">
+                Featured
               </Badge>
             )}
           </div>
@@ -116,7 +116,7 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
           {/* Top-right action buttons */}
           <div className="absolute top-3 right-3 flex flex-col gap-2">
             <motion.button
-              className="h-9 w-9 rounded-full bg-white/90 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center shadow-lg"
+              className="flex h-9 w-9 items-center justify-center rounded-sm bg-white/90 shadow-lg backdrop-blur-sm dark:bg-black/70"
               onClick={handleWishlist}
               whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.9 }}
@@ -126,7 +126,7 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
             </motion.button>
 
             <motion.button
-              className="h-9 w-9 rounded-full bg-white/90 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center shadow-lg"
+              className="flex h-9 w-9 items-center justify-center rounded-sm bg-white/90 shadow-lg backdrop-blur-sm dark:bg-black/70"
               onClick={handleQuickView}
               whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.9 }}
@@ -144,7 +144,7 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
             transition={{ duration: 0.22 }}
           >
             <button
-              className={`w-full py-2.5 rounded-full font-semibold text-sm shadow-lg flex items-center justify-center gap-2 transition-colors ${
+              className={`flex w-full items-center justify-center gap-2 rounded-sm py-2.5 text-sm font-semibold shadow-lg transition-colors ${
                 justAdded || inCart
                   ? "bg-green-600 text-white"
                   : "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -164,7 +164,7 @@ export function InteractiveProductCard({ product, onClick }: InteractiveProductC
           {/* Out of stock */}
           {product.inStock === false && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-              <span className="bg-black/80 text-white text-sm font-semibold px-4 py-2 rounded-full">Out of Stock</span>
+              <span className="rounded-sm bg-black/80 px-4 py-2 text-sm font-semibold text-white">Out of Stock</span>
             </div>
           )}
         </div>

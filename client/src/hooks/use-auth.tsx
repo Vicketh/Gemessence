@@ -7,6 +7,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 interface User {
   id: number;
   username: string;
+  fullName?: string | null;
   email: string;
   isVerified: boolean | null;
   isAdmin: boolean | null;
@@ -22,7 +23,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (data: { username: string; password: string }) => void;
-  register: (data: { username: string; email: string; password: string }) => void;
+  register: (data: { fullName: string; email: string; phone: string; password: string }) => void;
   logout: () => void;
   isLoginPending: boolean;
   isRegisterPending: boolean;
@@ -48,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const mapped: User = {
       id: u.id,
       username: u.username,
+      fullName: u.full_name ?? u.fullName ?? u.username,
       email: u.email,
       isVerified: u.is_verified ?? u.isVerified ?? false,
       isAdmin: u.is_admin ?? u.isAdmin ?? false,
@@ -99,15 +101,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (data: { username: string; email: string; password: string }) => {
+  const register = async (data: { fullName: string; email: string; phone: string; password: string }) => {
     setIsRegisterPending(true);
     try {
       let u: any = null;
+      const payload = {
+        ...data,
+        username: data.email.split("@")[0].replace(/[^a-z0-9_-]/gi, "").toLowerCase() || data.fullName.replace(/\s+/g, "").toLowerCase(),
+      };
       if (API_BASE) {
         const res = await fetch(`${API_BASE}/api/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify(payload),
           credentials: "include",
         });
         if (!res.ok) {
@@ -117,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         u = await res.json();
       } else {
         const { registerUser } = await import("@/lib/supabase");
-        u = await registerUser(data.username, data.email, data.password);
+        u = await registerUser(payload);
       }
       saveUser(u);
       toast({ title: "Welcome to Gemessence!", description: "Your account has been created." });

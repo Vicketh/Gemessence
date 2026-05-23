@@ -6,7 +6,7 @@ import { ProductModal } from "@/components/product-modal";
 import { useState } from "react";
 import { type Product } from "@shared/schema";
 import { motion } from "framer-motion";
-import { Package, Clock, Heart, Search } from "lucide-react";
+import { Package, Clock, Heart, Search, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import heroImg from "@assets/Hero_1772877259305.png";
 import { useLocation } from "wouter";
@@ -55,11 +55,11 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
           >
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-2">
-              Welcome back, <span className="text-primary">{user?.username}</span>
+              Welcome back, <span className="text-primary">{user?.fullName || user?.username}</span>
             </h1>
             <p className="text-muted-foreground flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${user?.isVerified ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-              {user?.isVerified ? 'Verified Member' : 'Pending Verification'} • Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear()}
+              {user?.isVerified ? 'Verified house client' : 'Pending client verification'} • Gemessence, jewellers of distinction since 2000
             </p>
           </motion.div>
 
@@ -69,7 +69,7 @@ export default function Dashboard() {
               { label: "Orders", value: "0", icon: Package },
               { label: "Wishlist", value: "12", icon: Heart },
               { label: "Recently Viewed", value: "24", icon: Clock },
-              { label: "Gem Points", value: "500", icon: Sparkles, color: "text-primary" },
+              { label: "Royal Points", value: "500", icon: Sparkles, color: "text-primary" },
             ].map((stat, i) => (
               <div key={i} className="bg-background/80 backdrop-blur-md border border-border/50 p-4 rounded-2xl flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
@@ -89,13 +89,13 @@ export default function Dashboard() {
       <section className="flex-1 py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <h2 className="font-display text-2xl font-bold">Exclusive Catalog</h2>
+            <h2 className="font-display text-2xl font-bold">Private Selection</h2>
             
             <div className="relative w-full md:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
-                placeholder="Search collections..." 
-                className="pl-10 bg-card rounded-full border-border focus:border-primary"
+                placeholder="Search gold, silver, diamond..." 
+                className="pl-10 bg-card rounded-sm border-border focus:border-primary"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -117,7 +117,7 @@ export default function Dashboard() {
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Package className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="font-display text-2xl font-bold mb-2">No pieces found</h3>
+              <h3 className="font-display text-2xl font-bold mb-2">No royal pieces found</h3>
               <p className="text-muted-foreground">We couldn't find anything matching your search.</p>
             </div>
           ) : (
@@ -141,6 +141,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-// Need to import Sparkles since I used it in stats array
-import { Sparkles } from "lucide-react";
