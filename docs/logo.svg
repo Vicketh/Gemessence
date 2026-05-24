@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" fill="none" width="420" height="100" role="img" aria-label="Gemessence">
+  <defs>
+    <!-- Gold gradient for G border, diamond outline, star, and swoosh -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C84A"/>
+      <stop offset="40%" stop-color="#C9A227"/>
+      <stop offset="100%" stop-color="#A07E1A"/>
+    </linearGradient>
+
+    <!-- Red gradient for G fill and swoosh -->
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A00000"/>
+      <stop offset="50%" stop-color="#800000"/>
+      <stop offset="100%" stop-color="#600000"/>
+    </linearGradient>
+
+    <!-- Swoosh fade-out gradient -->
+    <linearGradient id="swooshGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C9A227"/>
+      <stop offset="100%" stop-color="#E8C84A"/>
+    </linearGradient>
+
+    <!-- Diamond inner gold -->
+    <linearGradient id="diamondGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E8C84A"/>
+      <stop offset="100%" stop-color="#C9A227"/>
+    </linearGradient>
+
+    <!-- Drop shadow for G -->
+    <filter id="gShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+
+    <!-- Glow for star -->
+    <filter id="starGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ======================== -->
+  <!-- STYLIZED "G" MARK        -->
+  <!-- ======================== -->
+  <g filter="url(#gShadow)" transform="translate(8, 5)">
+    <!-- Outer gold border of G -->
+    <path d="
+      M 42,2
+      A 38,38 0 1,0 42,84
+      L 42,52
+      L 58,52
+      L 58,42
+      L 30,42
+      L 30,34
+      L 58,34
+      L 58,88
+      A 44,44 0 1,1 58,0
+      Z
+    " fill="url(#goldGrad)"/>
+
+    <!-- Inner red fill of G -->
+    <path d="
+      M 40,7
+      A 32,32 0 1,0 40,77
+      L 40,50
+      L 52,50
+      L 52,44
+      L 32,44
+      L 32,36
+      L 52,36
+      L 52,82
+      A 38,38 0 1,1 52,5
+      Z
+    " fill="url(#redGrad)"/>
+
+    <!-- ======================== -->
+    <!-- DIAMOND GEM (inside G)   -->
+    <!-- ======================== -->
+    <g transform="translate(22, 14)">
+      <!-- Diamond outer gold outline -->
+      <polygon points="14,0 28,14 14,28 0,14" fill="url(#diamondGold)" stroke="#E8C84A" stroke-width="0.5"/>
+      <!-- Diamond top half (black) -->
+      <polygon points="14,3 25,14 14,14 3,14" fill="#111"/>
+      <!-- Diamond bottom half (black) -->
+      <polygon points="3,14 14,14 14,25" fill="#1A1A1A"/>
+      <!-- Diamond center highlight -->
+      <polygon points="14,3 25,14 14,25 3,14" fill="none" stroke="#C9A227" stroke-width="0.8" opacity="0.5"/>
+      <!-- Inner facets -->
+      <line x1="14" y1="3" x2="14" y2="25" stroke="#C9A227" stroke-width="0.5" opacity="0.4"/>
+      <line x1="3" y1="14" x2="25" y2="14" stroke="#C9A227" stroke-width="0.5" opacity="0.4"/>
+      <!-- Small gold triangle at top of diamond -->
+      <polygon points="14,3 18,10 10,10" fill="url(#diamondGold)" opacity="0.7"/>
+    </g>
+  </g>
+
+  <!-- ======================== -->
+  <!-- "Gemessence" TEXT        -->
+  <!-- ======================== -->
+  <!-- Black cursive/script text -->
+  <text x="115" y="65" font-family="'Palatino Linotype','Book Antiqua',Palatino,Georgia,'Times New Roman',serif"
+        font-size="44" font-style="italic" font-weight="400"
+        fill="#0A0A0A" letter-spacing="0.5">Gemessence</text>
+
+  <!-- ======================== -->
+  <!-- 8-POINTED STAR SPARKLE   -->
+  <!-- ======================== -->
+  <g transform="translate(340, 8)" filter="url(#starGlow)">
+    <!-- Main vertical ray -->
+    <line x1="8" y1="0" x2="8" y2="16" stroke="url(#goldGrad)" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Main horizontal ray -->
+    <line x1="0" y1="8" x2="16" y2="8" stroke="url(#goldGrad)" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Diagonal rays -->
+    <line x1="2" y1="2" x2="14" y2="14" stroke="url(#goldGrad)" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
+    <line x1="14" y1="2" x2="2" y2="14" stroke="url(#goldGrad)" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
+    <!-- Center glow dot -->
+    <circle cx="8" cy="8" r="2" fill="#E8C84A" opacity="0.9"/>
+  </g>
+
+  <!-- ======================== -->
+  <!-- SWOOSH UNDERLINE         -->
+  <!-- ======================== -->
+  <path d="
+    M 105,78
+    Q 180,70 280,72
+    Q 340,73 400,76
+    L 398,79
+    Q 340,76 280,75
+    Q 180,73 107,81
+    Z
+  " fill="url(#redGrad)" opacity="0.9"/>
+  <!-- Gold top edge of swoosh -->
+  <path d="
+    M 105,78
+    Q 180,70 280,72
+    Q 340,73 400,76
+  " fill="none" stroke="url(#swooshGold)" stroke-width="1" opacity="0.8"/>
+  <!-- Gold bottom edge of swoosh -->
+  <path d="
+    M 107,81
+    Q 180,73 280,75
+    Q 340,76 398,79
+  " fill="none" stroke="url(#swooshGold)" stroke-width="0.8" opacity="0.6"/>
+</svg>

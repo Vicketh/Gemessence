@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Gemessence icon">
+  <defs>
+    <linearGradient id="fGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C84A"/>
+      <stop offset="50%" stop-color="#C9A227"/>
+      <stop offset="100%" stop-color="#A07E1A"/>
+    </linearGradient>
+    <linearGradient id="fRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A00000"/>
+      <stop offset="100%" stop-color="#600000"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="64" height="64" rx="10" fill="#0A0A0A"/>
+
+  <!-- G arc gold border -->
+  <path d="
+    M 36,8 A 24,24 0 1,0 36,56
+    L 36,38 L 44,38 L 44,34 L 28,34 L 28,30 L 44,30
+    L 44,60 A 28,28 0 1,1 44,4
+    Z
+  " fill="url(#fGold)"/>
+
+  <!-- G arc red fill -->
+  <path d="
+    M 34,12 A 19,19 0 1,0 34,52
+    L 34,36 L 40,36 L 40,32 L 30,32 L 30,28 L 40,28
+    L 40,56 A 23,23 0 1,1 40,8
+    Z
+  " fill="url(#fRed)"/>
+
+  <!-- Diamond gem inside G -->
+  <g transform="translate(18, 18)">
+    <polygon points="10,0 20,10 10,20 0,10" fill="url(#fGold)"/>
+    <polygon points="10,2 18,10 10,10 2,10" fill="#111"/>
+    <polygon points="2,10 10,10 10,18" fill="#1A1A1A"/>
+    <polygon points="10,2 20,10 10,18 0,10" fill="none" stroke="#C9A227" stroke-width="0.6" opacity="0.5"/>
+    <line x1="10" y1="2" x2="10" y2="18" stroke="#C9A227" stroke-width="0.4" opacity="0.4"/>
+    <line x1="0" y1="10" x2="20" y2="10" stroke="#C9A227" stroke-width="0.4" opacity="0.4"/>
+    <polygon points="10,2 14,7 6,7" fill="url(#fGold)" opacity="0.7"/>
+  </g>
+
+  <!-- 8-pointed star sparkle -->
+  <g transform="translate(48, 4)">
+    <line x1="5" y1="0" x2="5" y2="10" stroke="url(#fGold)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="0" y1="5" x2="10" y2="5" stroke="url(#fGold)" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="1.5" y1="1.5" x2="8.5" y2="8.5" stroke="url(#fGold)" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+    <line x1="8.5" y1="1.5" x2="1.5" y2="8.5" stroke="url(#fGold)" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+    <circle cx="5" cy="5" r="1.5" fill="#E8C84A"/>
+  </g>
+</svg>
