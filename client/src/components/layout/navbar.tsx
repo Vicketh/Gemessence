@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useTheme } from "next-themes";
 import { ThemeToggle } from "../ui/theme-toggle";
 import { CurrencyToggle } from "../ui/currency-toggle";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ const navGroups = [
 export function Navbar() {
   const { user, logout } = useAuth();
   const { totalItems } = useCartContext();
+  const { theme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -89,7 +91,7 @@ export function Navbar() {
           Gemessence, jewellers of distinction since 2000
         </div>
 
-        <div className="mx-auto grid h-20 max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 md:px-8">
+        <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-4 py-3 md:px-8 md:py-4 lg:py-5 h-20 md:h-24 lg:h-28 gap-4 md:gap-6">
           <nav className="hidden items-center gap-7 md:flex">
             {navGroups.slice(0, 2).map((group) => (
               <NavGroup key={group.label} group={group} />
@@ -100,7 +102,12 @@ export function Navbar() {
           </nav>
 
           <Link href="/" className="flex items-center justify-center">
-            <GemessenceLogo height={54} />
+            <div className="flex items-center justify-center h-full">
+              <GemessenceLogo 
+                height="100%" 
+                className="max-h-[60px] md:max-h-[75px] lg:max-h-[100px] drop-shadow-md" 
+              />
+            </div>
           </Link>
 
           <div className="flex items-center justify-end gap-1 md:gap-2">
