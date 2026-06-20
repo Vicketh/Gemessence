@@ -35,32 +35,32 @@ const navGroups = [
     href: "/shop#gold",
     links: [
       { label: "Gold necklaces", href: "/shop#necklaces" },
+      { label: "Gold earrings", href: "/shop#earrings" },
       { label: "Gold bracelets", href: "/shop#bracelets" },
-      { label: "Gold bangles", href: "/shop#artifacts" },
+      { label: "Gold waist beads", href: "/shop#waist-beads" },
+      { label: "Gold anklets", href: "/shop#anklets" },
     ],
   },
   {
     label: "Silver",
     href: "/shop#silver",
     links: [
-      { label: "Silver rings", href: "/shop#silver" },
+      { label: "Silver necklaces", href: "/shop#necklaces" },
       { label: "Silver earrings", href: "/shop#earrings" },
+      { label: "Silver bracelets", href: "/shop#bracelets" },
+      { label: "Silver waist beads", href: "/shop#waist-beads" },
+      { label: "Silver anklets", href: "/shop#anklets" },
     ],
   },
   {
     label: "Diamond",
     href: "/shop#diamond",
     links: [
-      { label: "Diamond rings", href: "/shop#diamond" },
-      { label: "Diamond pendants", href: "/shop#necklaces" },
-    ],
-  },
-  {
-    label: "Artifacts",
-    href: "/shop#artifacts",
-    links: [
-      { label: "Statement sets", href: "/shop#artifacts" },
-      { label: "Bracelets & bangles", href: "/shop#bracelets" },
+      { label: "Diamond necklaces", href: "/shop#necklaces" },
+      { label: "Diamond earrings", href: "/shop#earrings" },
+      { label: "Diamond bracelets", href: "/shop#bracelets" },
+      { label: "Diamond waist beads", href: "/shop#waist-beads" },
+      { label: "Diamond anklets", href: "/shop#anklets" },
     ],
   },
 ];

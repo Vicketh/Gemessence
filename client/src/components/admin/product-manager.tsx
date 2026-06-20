@@ -46,7 +46,7 @@ interface Product {
   };
 }
 
-const categories = ["Rings", "Necklaces", "Earrings", "Bracelets", "Engagement", "Wedding", "Sets"];
+const categories = ["Necklaces", "Earrings", "Bracelets", "Waist Beads", "Anklets"];
 const metalTypes = ["14k Gold", "18k Gold", "Sterling Silver", "Platinum", "Rose Gold"];
 const metalColors = ["Yellow", "White", "Rose"];
 const gemstoneTypes = ["Diamond", "Ruby", "Sapphire", "Emerald", "Pearl", "Amethyst"];

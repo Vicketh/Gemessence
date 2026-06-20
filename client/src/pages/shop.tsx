@@ -45,11 +45,10 @@ const materialCollections = [
 
 const shopCollections = [
   { label: "Necklaces", href: "#necklaces", image: "/assets/Gem (9).png" },
-  { label: "Chains", href: "#gold", image: "/Chain Ch.00_03_33_24.Still023.jpg" },
-  { label: "Rings", href: "#diamond", image: "/assets/Gem (6).png" },
-  { label: "Bracelets & Bangles", href: "#bracelets", image: "/assets/Gem (5).png" },
   { label: "Earrings", href: "#earrings", image: "/assets/Gem (13).png" },
-  { label: "Artifacts", href: "#artifacts", image: "/assets/Gem (25).png" },
+  { label: "Bracelets", href: "#bracelets", image: "/assets/Gem (5).png" },
+  { label: "Waist Beads", href: "#waist-beads", image: "/assets/Gem (2).png" },
+  { label: "Anklets", href: "#anklets", image: "/assets/Gem (7).png" },
 ];
 
 function belongsToMaterial(product: Product, material: string) {
@@ -96,11 +95,10 @@ export default function ShopPage() {
   );
 
   const necklaceProducts = products.filter((product) => categoryMatches(product, "necklace")).slice(0, 4);
-  const braceletProducts = products.filter((product) => categoryMatches(product, "bracelet")).slice(0, 4);
   const earringProducts = products.filter((product) => categoryMatches(product, "earring")).slice(0, 4);
-  const artifactProducts = products
-    .filter((product) => product.category.toLowerCase().includes("set") || product.name.toLowerCase().includes("bangle"))
-    .slice(0, 4);
+  const braceletProducts = products.filter((product) => categoryMatches(product, "bracelet")).slice(0, 4);
+  const waistBeadsProducts = products.filter((product) => categoryMatches(product, "waist beads")).slice(0, 4);
+  const ankletProducts = products.filter((product) => categoryMatches(product, "anklet")).slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -248,10 +246,11 @@ export default function ShopPage() {
           />
         ))}
 
-        <ProductGrid id="necklaces" eyebrow="Jewelry" title="Necklaces and chains" products={necklaceProducts} onSelect={setSelectedProduct} />
-        <ProductGrid id="bracelets" eyebrow="Jewelry" title="Bracelets and bangles" products={braceletProducts} onSelect={setSelectedProduct} />
+        <ProductGrid id="necklaces" eyebrow="Jewelry" title="Necklaces" products={necklaceProducts} onSelect={setSelectedProduct} />
         <ProductGrid id="earrings" eyebrow="Jewelry" title="Earrings" products={earringProducts} onSelect={setSelectedProduct} />
-        <ProductGrid id="artifacts" eyebrow="Artifacts" title="Statement sets and artifacts" products={artifactProducts} onSelect={setSelectedProduct} />
+        <ProductGrid id="bracelets" eyebrow="Jewelry" title="Bracelets" products={braceletProducts} onSelect={setSelectedProduct} />
+        <ProductGrid id="waist-beads" eyebrow="Jewelry" title="Waist Beads" products={waistBeadsProducts} onSelect={setSelectedProduct} />
+        <ProductGrid id="anklets" eyebrow="Jewelry" title="Anklets" products={ankletProducts} onSelect={setSelectedProduct} />
 
         <section id="contact" className="border-t border-border bg-card/50 py-16">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-[1fr_0.8fr] md:px-8">
