@@ -19,17 +19,17 @@ const heritageTiles = [
   {
     title: "Gold, silver, diamond",
     copy: "A focused catalogue arranged by the materials customers already ask for.",
-    image: "/assets/Gem (1).png",
+    image: "/assets/new/Gem (1).png",
   },
   {
     title: "Repairs and refinishing",
     copy: "Care-led jewelry services for pieces that deserve to keep their story.",
-    image: "/Chain Ch.00_03_39_13.Still018.jpg",
+    image: "/assets/new/Gem (18).png",
   },
   {
     title: "Bespoke guidance",
     copy: "Personal assistance for gifts, bridal pieces, statement sets, and sourcing.",
-    image: "/assets/Gem (3).png",
+    image: "/assets/new/Gem (3).png",
   },
 ];
 

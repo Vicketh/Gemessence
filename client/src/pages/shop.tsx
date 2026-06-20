@@ -24,31 +24,31 @@ const materialCollections = [
     id: "gold",
     title: "Gold",
     subtitle: "Yellow, white, and rose gold pieces with a warm Gemessence finish.",
-    image: "/assets/Gem (1).png",
+    image: "/assets/new/Gem (1).png",
     tone: "bg-[#c9a227]",
   },
   {
     id: "silver",
     title: "Silver",
     subtitle: "Sterling silver essentials, polished for everyday elegance.",
-    image: "/assets/Gem (8).png",
+    image: "/assets/new/Gem (8).png",
     tone: "bg-[#b8bec8]",
   },
   {
     id: "diamond",
     title: "Diamond",
     subtitle: "Diamond-led rings, pendants, and occasion pieces with precise sparkle.",
-    image: "/assets/Gem (3).png",
+    image: "/assets/new/Gem (3).png",
     tone: "bg-[#e7eef2]",
   },
 ];
 
 const shopCollections = [
-  { label: "Necklaces", href: "#necklaces", image: "/assets/Gem (9).png" },
-  { label: "Earrings", href: "#earrings", image: "/assets/Gem (13).png" },
-  { label: "Bracelets", href: "#bracelets", image: "/assets/Gem (5).png" },
-  { label: "Waist Beads", href: "#waist-beads", image: "/assets/Gem (2).png" },
-  { label: "Anklets", href: "#anklets", image: "/assets/Gem (7).png" },
+  { label: "Necklaces", href: "#necklaces", image: "/assets/new/Gem (9).png" },
+  { label: "Earrings", href: "#earrings", image: "/assets/new/Gem (13).png" },
+  { label: "Bracelets", href: "#bracelets", image: "/assets/new/Gem (5).png" },
+  { label: "Waist Beads", href: "#waist-beads", image: "/assets/new/Gem (2).png" },
+  { label: "Anklets", href: "#anklets", image: "/assets/new/Gem (7).png" },
 ];
 
 function belongsToMaterial(product: Product, material: string) {

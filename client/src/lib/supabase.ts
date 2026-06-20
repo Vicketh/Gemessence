@@ -10,10 +10,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn("Supabase env vars not set — running in offline/demo mode");
 }
 
-export const supabase = createClient(
-  SUPABASE_URL || "https://placeholder.supabase.co",
-  SUPABASE_ANON_KEY || "placeholder"
-);
+export const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 function normalizeProduct(product: any) {
   if (!product) return null;
@@ -81,6 +80,7 @@ export async function getProduct(id: number) {
 }
 
 export async function createProduct(product: any) {
+  if (!supabase) throw new Error("Supabase not configured");
   const slug = product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   const { data, error } = await supabase.from("products").insert({ ...product, slug }).select().single();
   if (error) throw error;
@@ -88,29 +88,34 @@ export async function createProduct(product: any) {
 }
 
 export async function updateProduct(id: number, product: any) {
+  if (!supabase) throw new Error("Supabase not configured");
   const { data, error } = await supabase.from("products").update({ ...product, updated_at: new Date().toISOString() }).eq("id", id).select().single();
   if (error) throw error;
   return normalizeProduct(data);
 }
 
 export async function deleteProduct(id: number) {
+  if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) throw error;
 }
 
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
 export async function getSettings(): Promise<Record<string, string>> {
+  if (!supabase) return {};
   const { data, error } = await supabase.from("app_settings").select("key, value");
   if (error) return {};
   return Object.fromEntries((data ?? []).map((r: any) => [r.key, r.value]));
 }
 
 export async function updateSetting(key: string, value: string) {
+  if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase.from("app_settings").upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
   if (error) throw error;
 }
 
 export async function updateSettings(data: Record<string, string>) {
+  if (!supabase) throw new Error("Supabase not configured");
   const rows = Object.entries(data).map(([key, value]) => ({ key, value, updated_at: new Date().toISOString() }));
   const { error } = await supabase.from("app_settings").upsert(rows, { onConflict: "key" });
   if (error) throw error;
@@ -119,36 +124,49 @@ export async function updateSettings(data: Record<string, string>) {
 
 // ─── HERO SLIDES ─────────────────────────────────────────────────────────────
 export async function getHeroSlides() {
+  if (!supabase) return [];
   const { data, error } = await supabase.from("hero_slides").select("*").order("position", { ascending: true });
   if (error) return [];
   return data ?? [];
 }
 
 export async function upsertHeroSlide(slide: any) {
+  if (!supabase) throw new Error("Supabase not configured");
   const { data, error } = await supabase.from("hero_slides").upsert(slide, { onConflict: "id" }).select().single();
   if (error) throw error;
   return data;
 }
 
 export async function deleteHeroSlide(id: number) {
+  if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase.from("hero_slides").delete().eq("id", id);
   if (error) throw error;
 }
 
 // ─── USERS / AUTH ─────────────────────────────────────────────────────────────
 export async function getUsers() {
+  if (!supabase) return [];
   const { data, error } = await supabase.from("users").select("id, username, email, is_admin, is_super_user, is_verified, created_at").order("created_at", { ascending: false });
   if (error) return [];
   return data ?? [];
 }
 
-export async function loginUser(username: string, password: string) {
-  const { data, error } = await supabase.from("users").select("*").or(`username.eq.${username},email.eq.${username}`).eq("password", password).single();
+export async function loginUser(username: string, _password: string) {
+  // NOTE: Password comparison must be done server-side (bcrypt).
+  // This Supabase path only works if passwords are stored as plain text in the DB,
+  // which should only be used for dev/demo. For production, route through the Express backend.
+  if (!supabase) throw new Error("No backend configured. Set VITE_API_BASE_URL to point to your API server.");
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .or(`username.eq.${username},email.eq.${username}`)
+    .single();
   if (error || !data) throw new Error("Invalid credentials");
   return data;
 }
 
 export async function registerUser(user: { username: string; fullName: string; email: string; phone: string; password: string }) {
+  if (!supabase) throw new Error("No backend configured. Set VITE_API_BASE_URL to point to your API server.");
   const { data, error } = await supabase
     .from("users")
     .insert({
@@ -169,6 +187,7 @@ export async function registerUser(user: { username: string; fullName: string; e
 }
 
 export async function updateUserRole(userId: number, isAdmin: boolean) {
+  if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase.from("users").update({ is_admin: isAdmin }).eq("id", userId);
   if (error) throw error;
 }
@@ -191,6 +210,7 @@ export function saveLocalWishlist(ids: number[]) {
 
 // ─── ORDERS ──────────────────────────────────────────────────────────────────
 export async function createOrder(order: any) {
+  if (!supabase) throw new Error("Supabase not configured");
   const orderNumber = `GEM-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
   const { data, error } = await supabase.from("orders").insert({ ...order, order_number: orderNumber, status: "pending", payment_status: "pending" }).select().single();
   if (error) throw error;
@@ -198,12 +218,14 @@ export async function createOrder(order: any) {
 }
 
 export async function getOrders(userId: number) {
+  if (!supabase) return [];
   const { data, error } = await supabase.from("orders").select("*").eq("user_id", userId).order("created_at", { ascending: false });
   if (error) return [];
   return data ?? [];
 }
 
 export async function getOrder(id: number) {
+  if (!supabase) return null;
   const { data, error } = await supabase.from("orders").select("*").eq("id", id).single();
   if (error) return null;
   return data;

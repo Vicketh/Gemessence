@@ -8,11 +8,8 @@ export function cn(...inputs: ClassValue[]) {
 export function resolveImageUrl(url?: string | null): string | undefined {
   if (!url) return undefined;
   if (/^(https?:\/\/|data:|blob:)/.test(url)) return url;
-  const normalizedUrl = url.replace(/^\/assets\/new\//, "/assets/");
-  const base = import.meta.env.BASE_URL || "/";
-  if (normalizedUrl.startsWith("/")) {
-    return `${base.replace(/\/$/, "")}${normalizedUrl}`;
-  }
+  const base = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
+  const normalizedUrl = url.startsWith("/") ? url : `/${url}`;
   return `${base}${normalizedUrl}`;
 }
 

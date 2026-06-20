@@ -7,16 +7,22 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Validate URL is a relative path or same-origin to prevent SSRF
+// Validate URL is a relative path, same-origin, or the configured API backend
+const API_ORIGIN = (() => {
+  const base = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  if (!base) return null;
+  try { return new URL(base).origin; } catch { return null; }
+})();
+
 function validateUrl(url: string): string {
   if (url.startsWith("/") || url.startsWith("./")) return url;
   try {
     const parsed = new URL(url);
-    if (parsed.origin !== window.location.origin) {
-      throw new Error(`Disallowed URL origin: ${parsed.origin}`);
-    }
-    return url;
-  } catch {
+    if (parsed.origin === window.location.origin) return url;
+    if (API_ORIGIN && parsed.origin === API_ORIGIN) return url;
+    throw new Error(`Disallowed URL origin: ${parsed.origin}`);
+  } catch (e: any) {
+    if (e.message.startsWith("Disallowed")) throw e;
     throw new Error(`Invalid URL: ${url}`);
   }
 }
