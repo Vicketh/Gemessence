@@ -1,0 +1,1 @@
+Scan the codebase of every project if opened for the first time to get context and have a clear understanding of the project and requirements.

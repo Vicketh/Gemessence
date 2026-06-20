@@ -158,3 +158,4 @@ replit.nix
 
 # Drizzle
 drizzle/
+.vercel

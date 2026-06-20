@@ -102,10 +102,11 @@ export function Navbar() {
           </nav>
 
           <Link href="/" className="flex items-center justify-center">
-            <div className="flex items-center justify-center h-full">
-              <GemessenceLogo 
-                height="100%" 
-                className="max-h-[60px] md:max-h-[75px] lg:max-h-[100px] drop-shadow-md" 
+            <div className="flex h-[60px] items-center justify-center md:h-[75px] lg:h-[100px]">
+              <GemessenceLogo
+                variant="full"
+                height="100%"
+                className="max-h-full w-auto"
               />
             </div>
           </Link>
