@@ -1,5 +1,6 @@
-import type React from "react";
-import { GemessenceLogoSVG } from "./gemessence-logo-svg";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { resolveImageUrl } from "@/lib/utils";
 
 interface LogoProps {
   variant?: "full" | "mark";
@@ -12,15 +13,30 @@ export function GemessenceLogo({
   className = "",
   height = 48,
   width,
-  variant = "full",
 }: LogoProps) {
+  const { resolvedTheme } = useTheme();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(resolvedTheme === "dark");
+  }, [resolvedTheme]);
+
+  const src = resolveImageUrl(
+    isDark ? "/gemessence-logo-dark.png" : "/gemessence-logo.png"
+  );
+
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
-      <GemessenceLogoSVG
-        variant={variant}
-        height={height}
-        width={width}
-        className="block h-auto w-auto drop-shadow-md transition-all duration-300"
+      <img
+        src={src}
+        alt="Gemessence"
+        style={{
+          height,
+          width: width ?? "auto",
+          objectFit: "contain",
+          display: "block",
+          transition: "opacity 0.3s",
+        }}
       />
     </div>
   );
