@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/use-auth";
 import { CurrencyProvider } from "@/hooks/use-currency";
 import { CartProvider } from "@/hooks/use-cart-context";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import ShopPage from "@/pages/shop";
@@ -55,6 +56,7 @@ function App() {
               <TooltipProvider>
                 <Toaster />
                 <Router />
+                <SpeedInsights />
               </TooltipProvider>
             </AuthProvider>
           </QueryClientProvider>
